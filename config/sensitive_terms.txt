@@ -1,0 +1,34 @@
+# Adult / explicit lexicon for presentation mode (words and hashtags).
+# Matched on whole words of the cleaned, lower-cased text.
+nsfw
+realnsfw
+porn
+porno
+pornstar
+nude
+nudes
+naked
+sex
+sexy
+horny
+hentai
+findom
+onlyfans
+fansly
+cock
+dick
+pussy
+boobs
+tits
+cum
+milf
+fetish
+bdsm
+kink
+kinky
+gaysex
+xxx
+lewd
+r18
+nsfwart
+nsfwtwt

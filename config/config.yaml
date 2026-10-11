@@ -1,0 +1,94 @@
+# Central configuration (plan section 24). Every script reads this file;
+# experiments override single keys from the command line.
+
+paths:
+  raw: hdfs:///social/raw/youtube
+  clean_volume: hdfs:///social/clean/volume
+  clean_model: hdfs:///social/clean/model
+  sample: hdfs:///social/sample_20
+  features: hdfs:///social/features
+  models: hdfs:///social/models
+  assignments: hdfs:///social/gold/assignments
+  reports_local: /app/reports
+  models_local: /app/models
+  registry: /app/experiments/experiment_results.csv
+  fasttext_model: /opt/models/lid.176.ftz
+
+dataset:
+  # The collector samples from June 1 through the current UTC date.
+  name: YouTube Vietnamese topics and comments sample
+  start: "2026-06-01 00:00:00"
+  end: "2026-10-12 00:00:00"
+
+spark:
+  shuffle_partitions: 32
+
+data:
+  sample_fraction: 0.2
+  seed: 42
+
+preprocessing:
+  language: vi
+  min_lang_confidence: 0.5
+  min_tokens: 3
+  use_bigram: false
+  bigram_min_df: 20
+  use_domain_stopwords: true
+  high_activity_quantile: 0.999
+
+features:
+  vocab_size: 20000
+  min_df: 5
+
+kmeans:
+  k: 10
+  max_iter: 30
+  seed: 42
+
+word2vec:
+  vector_size: 100
+  min_count: 5
+  window: 5
+  max_iter: 3
+  partitions: 8
+  seed: 42
+
+bisecting_kmeans:
+  k: 10
+  max_iter: 30
+  seed: 42
+
+lda:
+  k: 10
+  max_iter: 30
+  optimizer: online
+  vocab_size: 10000
+  seed: 42
+
+evaluation:
+  coherence_top_n: 10
+  heldout_fraction: 0.1
+  silhouette_sample: 200000
+
+trend:
+  # The data covers ~8 hours, so trends are intraday: 5-minute bins, baseline
+  # = the previous 60 minutes (12 bins). Daily / 48h windows do not apply.
+  primary_model: kmeans
+  bin_minutes: 5
+  rolling_window_bins: 12
+  min_periods: 6
+  burst_zscore_threshold: 2.5
+  std_floor_ratio: 0.1
+  burst_min_volume: 100
+  burst_min_lift: 1.2        # and >= 1.2x the baseline share (z alone flags +5% rises)
+  merge_gap_bins: 2
+  gap_volume_ratio: 0.2
+  gap_window_bins: 12
+
+mongo:
+  database: social_topics
+
+dashboard:
+  representative_posts_per_topic: 15
+  top_keywords: 15
+  top_hashtags_per_bin: 15

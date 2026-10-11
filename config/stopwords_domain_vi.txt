@@ -1,0 +1,18 @@
+# Platform and collection vocabulary that should not dominate topic terms.
+youtube
+video
+videos
+kênh
+clip
+subscribe
+subcribe
+đăng
+xem
+mọi
+người
+cảm
+ơn
+chúc
+like
+share
+comment

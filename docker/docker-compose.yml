@@ -1,0 +1,150 @@
+name: bigdata-topics
+
+x-spark-common: &spark-common
+  image: bigdata-spark:3.5.3
+  build:
+    context: ./spark
+  volumes:
+    - ..:/app
+    - ./spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+  networks: [bigdata]
+
+services:
+  namenode:
+    image: apache/hadoop:3.4.1
+    hostname: namenode
+    user: root
+    command: ["hdfs", "namenode"]
+    env_file: ./hadoop.env
+    environment:
+      # The image formats HDFS only when this directory is missing; a subdir
+      # of the volume makes the first start format and later starts reuse it.
+      ENSURE_NAMENODE_DIR: /hadoop/dfs/name/nn
+    ports:
+      - "127.0.0.1:9870:9870"
+    volumes:
+      - namenode:/hadoop/dfs/name
+      - ../data:/input:ro
+      - ../scripts:/scripts:ro
+    mem_limit: 1g
+    networks: [bigdata]
+
+  datanode-1:
+    image: apache/hadoop:3.4.1
+    hostname: datanode-1
+    user: root
+    command: ["hdfs", "datanode"]
+    env_file: ./hadoop.env
+    volumes:
+      - datanode1:/hadoop/dfs/data
+    depends_on: [namenode]
+    mem_limit: 768m
+    networks: [bigdata]
+
+  datanode-2:
+    image: apache/hadoop:3.4.1
+    hostname: datanode-2
+    user: root
+    command: ["hdfs", "datanode"]
+    env_file: ./hadoop.env
+    volumes:
+      - datanode2:/hadoop/dfs/data
+    depends_on: [namenode]
+    mem_limit: 768m
+    networks: [bigdata]
+
+  spark-master:
+    <<: *spark-common
+    hostname: spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+    ports:
+      - "127.0.0.1:8080:8080"
+    mem_limit: 768m
+
+  spark-worker-1:
+    <<: *spark-common
+    hostname: spark-worker-1
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    environment:
+      SPARK_WORKER_CORES: "4"
+      SPARK_WORKER_MEMORY: "4g"
+      SPARK_WORKER_WEBUI_PORT: "8081"
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on: [spark-master]
+    mem_limit: 4g
+
+  spark-worker-2:
+    <<: *spark-common
+    hostname: spark-worker-2
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
+    environment:
+      SPARK_WORKER_CORES: "4"
+      SPARK_WORKER_MEMORY: "4g"
+      SPARK_WORKER_WEBUI_PORT: "8082"
+    ports:
+      - "127.0.0.1:8082:8082"
+    depends_on: [spark-master]
+    mem_limit: 4g
+
+  # Job client: every spark-submit runs here, inside the Docker network,
+  # so HDFS datanode hostnames resolve (see plan section 5.1).
+  spark-client:
+    <<: *spark-common
+    hostname: spark-client
+    command: ["sleep", "infinity"]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+    ports:
+      - "127.0.0.1:4040:4040"
+    depends_on: [spark-master, namenode, mongodb]
+    mem_limit: 4g
+
+  jupyter:
+    <<: *spark-common
+    profiles: [notebook]
+    hostname: jupyter
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.token=", "--notebook-dir=/app/notebooks"]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+    ports:
+      - "127.0.0.1:8888:8888"
+    depends_on: [spark-master, namenode]
+    mem_limit: 3g
+
+  mongodb:
+    image: mongo:7.0
+    hostname: mongodb
+    ports:
+      - "127.0.0.1:27018:27017"
+    volumes:
+      - mongo:/data/db
+    mem_limit: 1g
+    networks: [bigdata]
+
+  # The dashboard needs only MongoDB and the local model copy (plan 12.4),
+  # never HDFS or the Spark cluster.
+  dashboard:
+    <<: *spark-common
+    hostname: dashboard
+    command: ["streamlit", "run", "/app/dashboard/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true", "--browser.gatherUsageStats=false"]
+    volumes:
+      - ..:/app
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      MODEL_DIR: /app/models
+      # pyspark ships inside /opt/spark/python; spark-submit adds it, streamlit does not.
+      PYTHONPATH: /app:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+    ports:
+      - "127.0.0.1:8501:8501"
+    depends_on: [mongodb]
+    mem_limit: 2g
+
+volumes:
+  namenode:
+  datanode1:
+  datanode2:
+  mongo:
+
+networks:
+  bigdata:
