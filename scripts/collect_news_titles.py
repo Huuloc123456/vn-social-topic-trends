@@ -57,17 +57,20 @@ def export_results(channels: list[dict], state: dict) -> None:
     by_channel, by_month = Counter(), Counter()
     retrieval_methods = Counter()
     records = 0
-    for line in RECORDS.read_text(encoding="utf-8").splitlines():
-        record = json.loads(line)
-        assert record["record_type"] == "video" and state["start"] <= record["created_at"][:10] < state["end"]
-        records += 1
-        retrieval_methods[record.get("retrieval_method", "playlistItems.list")] += 1
-        by_channel[record["channel_id"]] += 1
-        by_month[record["created_at"][:7]] += 1
-        title = clean_title(record["text"])
-        key = record["channel_id"], title.casefold()
-        if title and key not in seen:
-            seen.add(key)
+    with RECORDS.open(encoding="utf-8") as source:
+        for line in source:
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            assert record["record_type"] == "video" and state["start"] <= record["created_at"][:10] < state["end"]
+            records += 1
+            retrieval_methods[record.get("retrieval_method", "playlistItems.list")] += 1
+            by_channel[record["channel_id"]] += 1
+            by_month[record["created_at"][:7]] += 1
+            title = clean_title(record["text"])
+            key = record["channel_id"], title.casefold()
+            if title and key not in seen:
+                seen.add(key)
     manifest = {
         "source": "YouTube Data API v3: channel uploads and supplemental Search" if retrieval_methods["search.list"] else "YouTube Data API v3: channel uploads",
         "retrieval_methods": dict(retrieval_methods),
@@ -122,15 +125,16 @@ def main() -> None:
     state["channels"] = channel_ids
     seen_ids = set()
     counts = Counter()
-    for path in ([RECORDS] if RECORDS.exists() else []):
-        for line in path.read_text(encoding="utf-8-sig").splitlines():
-            if not line.strip():
-                continue
-            record = json.loads(line)
-            if record.get("record_type") != "video":
-                continue
-            seen_ids.add(record["uri"])
-            counts[record["channel_id"]] += 1
+    if RECORDS.exists():
+        with RECORDS.open(encoding="utf-8-sig") as source:
+            for line in source:
+                if not line.strip():
+                    continue
+                record = json.loads(line)
+                if record.get("record_type") != "video":
+                    continue
+                seen_ids.add(record["uri"])
+                counts[record["channel_id"]] += 1
     key = load_key()
     state["status"] = "in_progress"
     pages_at_start = state["pages"]

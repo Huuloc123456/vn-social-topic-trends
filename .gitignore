@@ -9,6 +9,7 @@ research_notes/
 .env
 .env.*
 !.env.example
+!config/.env.example
 *.pem
 *.key
 .streamlit/secrets.toml

@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from uuid import uuid4
 
 from pymongo import ASCENDING
 
@@ -24,11 +25,20 @@ def replace(db, name: str, docs, indexes: list[list[tuple]] | None = None):
         print(f"[MONGO] skip {name} (no source file)")
         return
     docs = docs if isinstance(docs, list) else [docs]
-    db[name].drop()
-    if docs:
-        db[name].insert_many([dict(d) for d in docs])
-    for keys in indexes or []:
-        db[name].create_index(keys)
+    staging_name = f"{name}__staging_{uuid4().hex}"
+    staging = db.create_collection(staging_name)
+    try:
+        if docs:
+            staging.insert_many([dict(d) for d in docs])
+        for keys in indexes or []:
+            staging.create_index(keys)
+        staging.rename(name, dropTarget=True)
+    except Exception:
+        try:
+            staging.drop()
+        except Exception:
+            pass
+        raise
     print(f"[MONGO] {name}: {len(docs)} docs")
 
 

@@ -21,7 +21,7 @@ def load_key() -> str:
             key, sep, value = line.partition("=")
             if sep and key.strip().lstrip("\ufeff") == "YOUTUBE_API_KEY":
                 return value.strip().strip("\"'")
-    raise SystemExit("Missing YOUTUBE_API_KEY. Add it to .env (see .env.example).")
+    raise SystemExit("Missing YOUTUBE_API_KEY. Add it to .env (see config/.env.example).")
 
 
 def get_json(key: str, path: str, **params):
