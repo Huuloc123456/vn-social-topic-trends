@@ -4,16 +4,17 @@
         --set preprocessing.use_domain_sw=false
 
 Every run writes:
-  experiments/experiment_results.csv   one registry row (plan 17)
-  experiments/runs/<id>.json           top terms + sizes per topic, for the
+  experiments/youtube_news/experiment_results.csv   one registry row (plan 17)
+  experiments/youtube_news/runs/<id>.json           top terms + sizes per topic, for the
                                        manual interpretability rating (11.6)
-  hdfs:///social/models/<id>           the full PipelineModel (with --save)
+  hdfs:///social/youtube_news/models/<id>           the full PipelineModel (with --save)
 """
 from __future__ import annotations
 
 import argparse
 import json
 import urllib.request
+from pathlib import Path
 
 import numpy as np
 from pyspark.ml import PipelineModel
@@ -22,7 +23,7 @@ from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.functions import vector_to_array
 from pyspark.sql import functions as F
 
-from src.common import APP_ROOT, Timer, append_registry, get_spark, load_config, write_json
+from src.common import Timer, append_registry, get_spark, load_config, write_json
 from src.features import class_tfidf_terms, drop_empty, final_tokens_col, kmeans_prep, lda_prep, vocabulary, w2v_prep
 from src.model.coherence import npmi
 
@@ -116,7 +117,7 @@ def main():
 
     row["runtime_s"] = t.seconds
     run_id = append_registry(cfg, {**row, "id": a.id} if a.id else row)
-    write_json(APP_ROOT / "experiments" / "runs" / f"{run_id}.json", {
+    write_json(Path(cfg["paths"]["registry"]).parent / "runs" / f"{run_id}.json", {
         "id": run_id, **row,
         "topics": [{"topic": i, "top_terms": topics[i], "npmi": round(topic_npmi[i], 4),
                     "size": sizes.get(i, 0), "share": round(sizes.get(i, 0) / total, 4)} for i in range(a.k)],

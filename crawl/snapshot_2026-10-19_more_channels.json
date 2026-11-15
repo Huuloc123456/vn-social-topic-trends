@@ -1,0 +1,373 @@
+{
+  "snapshot_date": "2026-10-19",
+  "created_at_utc": "2026-10-19T12:17:51.952515+00:00",
+  "description": "Additional official publisher channels collected using the remainder of the program daily API budget. Existing cached video metrics were not refreshed.",
+  "source_registry_snapshot": "crawl/sources_current.csv",
+  "source_code": [
+    "scripts/collect_news_titles.py",
+    "scripts/export_news_videos.py",
+    "scripts/youtube_api.py"
+  ],
+  "configured_channels": 38,
+  "channels_with_csv_rows": 34,
+  "previous_csv_rows": 227000,
+  "new_raw_video_ids": 21299,
+  "net_additional_csv_rows": 21081,
+  "csv_sha256": "2a5a2e6d3b419139d849836dd5f645269d2a167d3afe929601f45da1f42d3470",
+  "csv_bytes": 70850781,
+  "earliest_publication_vn": "2026-01-01T07:00:06+07:00",
+  "latest_publication_vn": "2026-10-19T18:44:15+07:00",
+  "quota_day_pt": "2026-10-19",
+  "recorded_collector_and_discovery_calls": 5163,
+  "recorded_metadata_calls": 2837,
+  "recorded_daily_calls": 8000,
+  "program_daily_budget": 8000,
+  "program_budget_remaining": 0,
+  "quota_note": "Local program counters only, not the remaining quota measured by Google Cloud.",
+  "incomplete_channel": {
+    "id": "UCW_8shqbwG0AMveQtIW33jQ",
+    "name": "Cần Thơ mến yêu",
+    "earliest_csv_publication_vn": "2026-02-24T20:54:36+07:00"
+  },
+  "resume_command": "python scripts/collect_news_titles.py --start 2026-01-01 --end 2026-10-20",
+  "analysis_note": "HDFS analysis, models, MongoDB and dashboard have not been rebuilt.",
+  "collection_manifest": {
+    "source": "YouTube Data API v3: videos.list (snippet,statistics)",
+    "status": "partial_collection",
+    "collection_status": "budget_limited",
+    "target_rows": 100000,
+    "target_reached": true,
+    "csv_rows": 248081,
+    "raw_video_ids": 252078,
+    "metadata_checked": 252078,
+    "start_utc": "2026-01-01",
+    "end_utc_exclusive": "2026-10-20",
+    "deduplication": "One video ID; one normalized title per channel, keeping the newest publication. Same titles from different channels are retained.",
+    "author_definition": "The YouTube publishing channel title; not an individual reporter.",
+    "statistics_definition": "Public cumulative counts at metrics_collected_at_utc, not counts on the publication date. Missing counts are blank, never replaced by zero.",
+    "title_groups_retained_across_channels": 2204,
+    "missing_view_count": 0,
+    "missing_like_count": 25159,
+    "unavailable_video_ids": 0,
+    "records_by_month_vn": {
+      "2026-01": 24882,
+      "2026-02": 23124,
+      "2026-03": 28201,
+      "2026-04": 26670,
+      "2026-05": 27820,
+      "2026-06": 25887,
+      "2026-07": 25304,
+      "2026-08": 24999,
+      "2026-09": 25558,
+      "2026-10": 15636
+    },
+    "channels": [
+      {
+        "id": "UCr8i-5AIxdiJbI0HdGdUzIA",
+        "name": "Báo Lao Động",
+        "url": "https://www.youtube.com/channel/UCr8i-5AIxdiJbI0HdGdUzIA",
+        "uploads": "UUr8i-5AIxdiJbI0HdGdUzIA",
+        "csv_rows": 8277
+      },
+      {
+        "id": "UCPJfjHrW3-zIeSaZTgmckmg",
+        "name": "Báo Nhân Dân",
+        "url": "https://www.youtube.com/channel/UCPJfjHrW3-zIeSaZTgmckmg",
+        "uploads": "UUPJfjHrW3-zIeSaZTgmckmg",
+        "csv_rows": 4917
+      },
+      {
+        "id": "UCIW9cGgoRuGJnky3K3tbzNg",
+        "name": "Báo Thanh Niên",
+        "url": "https://www.youtube.com/channel/UCIW9cGgoRuGJnky3K3tbzNg",
+        "uploads": "UUIW9cGgoRuGJnky3K3tbzNg",
+        "csv_rows": 9281
+      },
+      {
+        "id": "UC47WI-kZXFf0H_f7pvaNCEQ",
+        "name": "Báo Tuổi Trẻ",
+        "url": "https://www.youtube.com/channel/UC47WI-kZXFf0H_f7pvaNCEQ",
+        "uploads": "UU47WI-kZXFf0H_f7pvaNCEQ",
+        "csv_rows": 8590
+      },
+      {
+        "id": "UCOEvEldWBMOHNdlzcofFa9w",
+        "name": "Báo VietNamNet",
+        "url": "https://www.youtube.com/channel/UCOEvEldWBMOHNdlzcofFa9w",
+        "uploads": "UUOEvEldWBMOHNdlzcofFa9w",
+        "csv_rows": 17454
+      },
+      {
+        "id": "UCB1s_QHdgSZwXO2ZjCjtOMw",
+        "name": "VOV Live - Tin Tức Trong Ngày",
+        "url": "https://www.youtube.com/channel/UCB1s_QHdgSZwXO2ZjCjtOMw",
+        "uploads": "UUB1s_QHdgSZwXO2ZjCjtOMw",
+        "csv_rows": 2236
+      },
+      {
+        "id": "UC68VHcQS5x-WNFmf5cAFtgg",
+        "name": "VTC NEWS",
+        "url": "https://www.youtube.com/channel/UC68VHcQS5x-WNFmf5cAFtgg",
+        "uploads": "UU68VHcQS5x-WNFmf5cAFtgg",
+        "csv_rows": 8993
+      },
+      {
+        "id": "UCabsTV34JwALXKGMqHpvUiA",
+        "name": "VTV24",
+        "url": "https://www.youtube.com/channel/UCabsTV34JwALXKGMqHpvUiA",
+        "uploads": "UUabsTV34JwALXKGMqHpvUiA",
+        "csv_rows": 7384
+      },
+      {
+        "id": "UCIg56SgvoZF8Qg0Jx_gh6Pg",
+        "name": "ANTV - Truyền hình Công an Nhân dân",
+        "url": "https://www.youtube.com/channel/UCIg56SgvoZF8Qg0Jx_gh6Pg",
+        "uploads": "UUIg56SgvoZF8Qg0Jx_gh6Pg",
+        "csv_rows": 14957
+      },
+      {
+        "id": "UCHZ_b_qC_k_ORdCkiPCpFsw",
+        "name": "Báo Dân Trí",
+        "url": "https://www.youtube.com/channel/UCHZ_b_qC_k_ORdCkiPCpFsw",
+        "uploads": "UUHZ_b_qC_k_ORdCkiPCpFsw",
+        "csv_rows": 2818
+      },
+      {
+        "id": "UC7_mgS3z22z0WhR7COJ8E2w",
+        "name": "HTV - Đài Hà Nội",
+        "url": "https://www.youtube.com/channel/UC7_mgS3z22z0WhR7COJ8E2w",
+        "uploads": "UU7_mgS3z22z0WhR7COJ8E2w",
+        "csv_rows": 8656
+      },
+      {
+        "id": "UCPhPBJ3qE719TgLYVcNY8yg",
+        "name": "Tiền Phong TV",
+        "url": "https://www.youtube.com/channel/UCPhPBJ3qE719TgLYVcNY8yg",
+        "uploads": "UUPhPBJ3qE719TgLYVcNY8yg",
+        "csv_rows": 11914
+      },
+      {
+        "id": "UCMvvxThWxbWCXANln_OzIlA",
+        "name": "VOV1 - Đài tiếng nói Việt Nam",
+        "url": "https://www.youtube.com/channel/UCMvvxThWxbWCXANln_OzIlA",
+        "uploads": "UUMvvxThWxbWCXANln_OzIlA",
+        "csv_rows": 6196
+      },
+      {
+        "id": "UCB4L3X13o5bJFulg3iiS8-w",
+        "name": "VOV2 - VĂN HÓA & XÃ HỘI",
+        "url": "https://www.youtube.com/channel/UCB4L3X13o5bJFulg3iiS8-w",
+        "uploads": "UUB4L3X13o5bJFulg3iiS8-w",
+        "csv_rows": 564
+      },
+      {
+        "id": "UCp6PchFsCg582xw6gEjpzVA",
+        "name": "Báo Pháp Luật TP HCM",
+        "url": "https://www.youtube.com/channel/UCp6PchFsCg582xw6gEjpzVA",
+        "uploads": "UUp6PchFsCg582xw6gEjpzVA",
+        "verified_from": "https://plo.vn/",
+        "csv_rows": 6301
+      },
+      {
+        "id": "UC6BENb97B-9QXIOCjbW9Lvw",
+        "name": "Báo Sài Gòn Giải Phóng",
+        "url": "https://www.youtube.com/channel/UC6BENb97B-9QXIOCjbW9Lvw",
+        "uploads": "UU6BENb97B-9QXIOCjbW9Lvw",
+        "verified_from": "https://www.sggp.org.vn/",
+        "csv_rows": 5600
+      },
+      {
+        "id": "UCD09NCZlzMj4yGvGkLbuBpw",
+        "name": "Báo Sức khỏe & Đời sống",
+        "url": "https://www.youtube.com/channel/UCD09NCZlzMj4yGvGkLbuBpw",
+        "uploads": "UUD09NCZlzMj4yGvGkLbuBpw",
+        "verified_from": "https://suckhoedoisong.vn/",
+        "csv_rows": 17683
+      },
+      {
+        "id": "UCZYKmEA2iQOSbyKc6xj5Vfw",
+        "name": "HTV Tin Tức",
+        "url": "https://www.youtube.com/channel/UCZYKmEA2iQOSbyKc6xj5Vfw",
+        "uploads": "UUZYKmEA2iQOSbyKc6xj5Vfw",
+        "verified_from": "https://htv.vn/",
+        "csv_rows": 19106
+      },
+      {
+        "id": "UCrwJa6KRHWnJpJPZNeKKcvA",
+        "name": "Tuổi Trẻ Media",
+        "url": "https://www.youtube.com/channel/UCrwJa6KRHWnJpJPZNeKKcvA",
+        "uploads": "UUrwJa6KRHWnJpJPZNeKKcvA",
+        "verified_from": "https://tuoitre.vn/tto-plo.htm",
+        "csv_rows": 2842
+      },
+      {
+        "id": "UCmBT5CqUxf3-K5_IU9tVtBg",
+        "name": "VNAMEDIA - TRUNG TÂM NỘI DUNG SỐ VÀ TRUYỀN THÔNG",
+        "url": "https://www.youtube.com/channel/UCmBT5CqUxf3-K5_IU9tVtBg",
+        "uploads": "UUmBT5CqUxf3-K5_IU9tVtBg",
+        "verified_from": "https://vietnammedia.vnanet.vn/",
+        "csv_rows": 5181
+      },
+      {
+        "id": "UCsWMcnVUYQZc-ugInnw_0LA",
+        "name": "VTV Online",
+        "url": "https://www.youtube.com/channel/UCsWMcnVUYQZc-ugInnw_0LA",
+        "uploads": "UUsWMcnVUYQZc-ugInnw_0LA",
+        "verified_from": "https://vtv.vn/",
+        "csv_rows": 0
+      },
+      {
+        "id": "UCQ4JPrrur8XOuxNugXmc39g",
+        "name": "VTV4",
+        "url": "https://www.youtube.com/channel/UCQ4JPrrur8XOuxNugXmc39g",
+        "uploads": "UUQ4JPrrur8XOuxNugXmc39g",
+        "verified_from": "https://vtv.vn/",
+        "csv_rows": 3259
+      },
+      {
+        "id": "UCqhVVGb6a5x_OrTVTDvVfHQ",
+        "name": "Truyền hình Thanh Hóa",
+        "url": "https://www.youtube.com/channel/UCqhVVGb6a5x_OrTVTDvVfHQ",
+        "uploads": "UUqhVVGb6a5x_OrTVTDvVfHQ",
+        "verified_from": "https://baothanhhoa.vn/ptth/",
+        "csv_rows": 5981
+      },
+      {
+        "id": "UCgeQezjQQi43YaBFWD5vUyQ",
+        "name": "Nghệ An TV",
+        "url": "https://www.youtube.com/channel/UCgeQezjQQi43YaBFWD5vUyQ",
+        "uploads": "UUgeQezjQQi43YaBFWD5vUyQ",
+        "verified_from": "https://truyenhinhnghean.vn/hoat-dong-ntv/202309/dai-ptth-nghe-an-gianh-nut-vang-kenh-youtube-nghe-an-tv-e4f10be/",
+        "csv_rows": 9411
+      },
+      {
+        "id": "UCNVGuKjkFboEbvo2Q8qHM2w",
+        "name": "Báo Hải Phòng Plus",
+        "url": "https://www.youtube.com/channel/UCNVGuKjkFboEbvo2Q8qHM2w",
+        "uploads": "UUNVGuKjkFboEbvo2Q8qHM2w",
+        "verified_from": "https://baohaiphong.vn/",
+        "csv_rows": 3632
+      },
+      {
+        "id": "UCkrod22QSphfx-6RZzu2wIA",
+        "name": "BÁO PHÚ THỌ",
+        "url": "https://www.youtube.com/channel/UCkrod22QSphfx-6RZzu2wIA",
+        "uploads": "UUkrod22QSphfx-6RZzu2wIA",
+        "verified_from": "https://baophutho.vn/",
+        "csv_rows": 0
+      },
+      {
+        "id": "UCDIl_FogyBJAUI3QVyLet8w",
+        "name": "Truyền Hình Đồng Tháp",
+        "url": "https://www.youtube.com/channel/UCDIl_FogyBJAUI3QVyLet8w",
+        "uploads": "UUDIl_FogyBJAUI3QVyLet8w",
+        "verified_from": "https://baodongthap.vn/",
+        "csv_rows": 16341
+      },
+      {
+        "id": "UC60l4cd7Ueq84J6g3xUOcIg",
+        "name": "Miền Tây THĐT2",
+        "url": "https://www.youtube.com/channel/UC60l4cd7Ueq84J6g3xUOcIg",
+        "uploads": "UU60l4cd7Ueq84J6g3xUOcIg",
+        "verified_from": "https://baodongthap.vn/",
+        "csv_rows": 7031
+      },
+      {
+        "id": "UCp7D27kB0DUbFOs3iWExtTQ",
+        "name": "Báo và phát thanh, truyền hình Đà Nẵng",
+        "url": "https://www.youtube.com/channel/UCp7D27kB0DUbFOs3iWExtTQ",
+        "uploads": "UUp7D27kB0DUbFOs3iWExtTQ",
+        "verified_from": "https://baodanang.vn/",
+        "csv_rows": 2316
+      },
+      {
+        "id": "UCzULP69dvM7Ehvn8RLmtdQw",
+        "name": "Truyền hình Nghệ An",
+        "url": "https://www.youtube.com/channel/UCzULP69dvM7Ehvn8RLmtdQw",
+        "uploads": "UUzULP69dvM7Ehvn8RLmtdQw",
+        "verified_from": "https://truyenhinhnghean.vn/hoat-dong-ntv/202309/dai-ptth-nghe-an-gianh-nut-vang-kenh-youtube-nghe-an-tv-e4f10be/",
+        "csv_rows": 1680
+      },
+      {
+        "id": "UC0Rd9opm-RIWEoMvhq6ottQ",
+        "name": "THVL Tổng Hợp",
+        "url": "https://www.youtube.com/channel/UC0Rd9opm-RIWEoMvhq6ottQ",
+        "uploads": "UU0Rd9opm-RIWEoMvhq6ottQ",
+        "verified_from": "https://vinhlong.gov.vn/Portals/0/VanBanChuyenDoiSo/636-bc_signed.pdf",
+        "csv_rows": 2707
+      },
+      {
+        "id": "UCbs8GhLTzmPUZKVLFGbna1A",
+        "name": "THVL 24News",
+        "url": "https://www.youtube.com/channel/UCbs8GhLTzmPUZKVLFGbna1A",
+        "uploads": "UUbs8GhLTzmPUZKVLFGbna1A",
+        "verified_from": "https://vinhlong.dcs.vn/chao-buoi-sang-682026-1008068.ngn",
+        "csv_rows": 5692
+      },
+      {
+        "id": "UCVRqZH5QnrnbMWhElPBD-MQ",
+        "name": "Tọa đàm VnExpress",
+        "url": "https://www.youtube.com/channel/UCVRqZH5QnrnbMWhElPBD-MQ",
+        "uploads": "UUVRqZH5QnrnbMWhElPBD-MQ",
+        "verified_from": "https://vnexpress.net/",
+        "csv_rows": 0
+      },
+      {
+        "id": "UCetWN2zTJ4ja3sNHfDLr-7w",
+        "name": "Báo Hà Nội Mới",
+        "url": "https://www.youtube.com/channel/UCetWN2zTJ4ja3sNHfDLr-7w",
+        "uploads": "UUetWN2zTJ4ja3sNHfDLr-7w",
+        "verified_from": "https://hanoimoi.vn/",
+        "csv_rows": 1658
+      },
+      {
+        "id": "UC9CbjDlw_c1KGH7t6XHyJ_Q",
+        "name": "Báo Xây dựng",
+        "url": "https://www.youtube.com/channel/UC9CbjDlw_c1KGH7t6XHyJ_Q",
+        "uploads": "UU9CbjDlw_c1KGH7t6XHyJ_Q",
+        "verified_from": "https://baoxaydung.vn/",
+        "csv_rows": 5298
+      },
+      {
+        "id": "UCoMKqtfNzYMEIVBeBrF1Pkg",
+        "name": "Báo Lâm Đồng",
+        "url": "https://www.youtube.com/channel/UCoMKqtfNzYMEIVBeBrF1Pkg",
+        "uploads": "UUoMKqtfNzYMEIVBeBrF1Pkg",
+        "verified_from": "https://baolamdong.vn/",
+        "csv_rows": 0
+      },
+      {
+        "id": "UCLXwTlUcQi4LGH5sq_fyMAg",
+        "name": "Tây Ninh TV",
+        "url": "https://www.youtube.com/channel/UCLXwTlUcQi4LGH5sq_fyMAg",
+        "uploads": "UULXwTlUcQi4LGH5sq_fyMAg",
+        "verified_from": "https://baotayninh.vn/",
+        "csv_rows": 11726
+      },
+      {
+        "id": "UCW_8shqbwG0AMveQtIW33jQ",
+        "name": "Cần Thơ mến yêu",
+        "url": "https://www.youtube.com/channel/UCW_8shqbwG0AMveQtIW33jQ",
+        "uploads": "UUW_8shqbwG0AMveQtIW33jQ",
+        "verified_from": "https://baocantho.com.vn/",
+        "csv_rows": 2399
+      }
+    ],
+    "export": "data\\exports\\youtube_news_videos_clean.csv",
+    "columns": [
+      "video_id",
+      "title",
+      "published_at_utc",
+      "published_at_vn",
+      "author",
+      "channel_id",
+      "video_url",
+      "view_count",
+      "like_count",
+      "metrics_collected_at_utc"
+    ],
+    "metrics_earliest_utc": "2026-10-14T07:08:04.619597Z",
+    "metrics_latest_utc": "2026-10-19T12:17:01.165674Z",
+    "retention_note": "Refresh or delete YouTube API metadata within 30 calendar days."
+  }
+}

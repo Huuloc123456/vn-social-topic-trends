@@ -10,7 +10,7 @@ import streamlit as st
 from pymongo import MongoClient
 
 APP_ROOT = Path(__file__).resolve().parent.parent
-DB_NAME = "social_topics"
+DB_NAME = "youtube_news_topics"
 
 
 @st.cache_resource
@@ -26,12 +26,16 @@ def _docs(name: str, query: dict | None = None, sort: list | None = None) -> lis
     return list(cur)
 
 
-@st.cache_data(ttl=600)
-def available() -> bool:
+@st.cache_data(ttl=30)
+def status() -> str:
+    """Distinguish an unreachable MongoDB from an empty/incomplete dashboard dataset."""
     try:
-        return _db()["topics"].estimated_document_count() > 0
+        db = _db()
+        db.command("ping")
+        required = ("topics", "topic_trend", "posts_per_bin", "daily_issues")
+        return "ready" if all(db[name].estimated_document_count() > 0 for name in required) else "empty"
     except Exception:
-        return False
+        return "offline"
 
 
 @st.cache_data(ttl=600)
@@ -78,6 +82,15 @@ def posts_per_bin() -> pd.DataFrame:
 @st.cache_data(ttl=600)
 def representative(topic_id: int) -> pd.DataFrame:
     return pd.DataFrame(_docs("representative_posts", {"topic_id": int(topic_id)}, [("score", -1)]))
+
+
+@st.cache_data(ttl=600)
+def daily_issues() -> pd.DataFrame:
+    """Per-day topic counts, distinguishing words, and representative content."""
+    df = frame("daily_issues", (("date", 1), ("topic_id", 1)))
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"])
+    return df
 
 
 @st.cache_data(ttl=3600)

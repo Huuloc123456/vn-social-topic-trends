@@ -33,12 +33,9 @@ def main():
 
         totals = spark.sql("""
             SELECT count(*) AS posts,
-                   count(DISTINCT author) AS authors,
+                   count(DISTINCT channel_id) AS authors,
                    min(created_at) AS first_post, max(created_at) AS last_post,
-                   avg(CAST(is_reply AS INT)) AS reply_share,
-                   avg(CAST(has_images AS INT)) AS image_share,
                    avg(CAST(size(hashtags) > 0 AS INT)) AS hashtag_share,
-                   avg(CAST(is_high_activity_account AS INT)) AS high_activity_post_share,
                    avg(CAST(is_sensitive AS INT)) AS sensitive_share
             FROM posts""").toPandas().iloc[0].to_dict()
         totals["model_posts"] = mod.count()
@@ -46,26 +43,25 @@ def main():
 
         per_bin = vol.groupBy("bucket").agg(
             F.count("*").alias("posts"),
-            F.sum(F.col("is_reply").cast("int")).alias("replies"),
-            F.countDistinct("author").alias("authors"),
+            F.countDistinct("channel_id").alias("authors"),
         ).orderBy("bucket").toPandas()
         series = per_bin.set_index(pd.to_datetime(per_bin["bucket"]))["posts"]
         gaps = detect_gaps(series, ratio=tr["gap_volume_ratio"], window=tr["gap_window_bins"],
                            freq=f"{tr['bin_minutes']}min")
         per_bin["is_gap"] = per_bin["bucket"].map(lambda b: bool(gaps.get(pd.Timestamp(b), False)))
 
-        per_hour = vol.groupBy("hour").count().orderBy("hour")
+        per_day = vol.groupBy("day").count().orderBy("day")
 
         tags = vol.select(F.explode("hashtags").alias("hashtag"))
         top_hashtags = tags.groupBy("hashtag").count().orderBy(F.desc("count"))
         safe = vol.filter(~F.col("is_sensitive"))
         top_hashtags_safe = (safe.select(F.explode("hashtags").alias("hashtag"))
                              .groupBy("hashtag").count().orderBy(F.desc("count")))
-        tags_by_hour = (vol.select("hour", F.explode("hashtags").alias("hashtag"))
-                        .groupBy("hour", "hashtag").count())
-        top_tags_by_hour = (tags_by_hour
-                            .withColumn("rank", F.row_number().over(Window.partitionBy("hour").orderBy(F.desc("count"))))
-                            .filter("rank <= 10").orderBy("hour", "rank"))
+        tags_by_day = (vol.select("day", F.explode("hashtags").alias("hashtag"))
+                        .groupBy("day", "hashtag").count())
+        top_tags_by_day = (tags_by_day
+                            .withColumn("rank", F.row_number().over(Window.partitionBy("day").orderBy(F.desc("count"))))
+                            .filter("rank <= 10").orderBy("day", "rank"))
 
         doc_freq = (mod.select(F.explode(F.array_distinct("tokens")).alias("token"))
                     .groupBy("token").count().orderBy(F.desc("count")))
@@ -77,7 +73,7 @@ def main():
                            .alias("tokens"))
                    .groupBy("tokens").count())
 
-        author_activity = (vol.groupBy("author").count()
+        author_activity = (vol.groupBy("channel_id").count()
                            .select(F.when(F.col("count") == 1, "1").when(F.col("count") <= 5, "2-5")
                                    .when(F.col("count") <= 20, "6-20").when(F.col("count") <= 100, "21-100")
                                    .otherwise(">100").alias("posts_per_author"))
@@ -87,10 +83,10 @@ def main():
             "totals": totals,
             "posts_per_bin": per_bin.assign(bucket=per_bin["bucket"].astype(str)).to_dict("records"),
             "gap_bins": [str(b) for b in gaps[gaps].index],
-            "posts_per_hour": records(per_hour),
+            "posts_per_day": records(per_day),
             "top_hashtags": records(top_hashtags, 40),
             "top_hashtags_safe": records(top_hashtags_safe, 40),
-            "top_hashtags_by_hour": records(top_tags_by_hour),
+            "top_hashtags_by_day": records(top_tags_by_day),
             "top_tokens_by_doc_frequency": [
                 {**r, "doc_share": round(r["count"] / n_model, 4)} for r in records(doc_freq, 60)],
             "token_length_distribution": records(lengths),

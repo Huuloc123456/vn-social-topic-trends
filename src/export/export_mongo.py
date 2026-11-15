@@ -50,8 +50,8 @@ def main():
             "token_length": eda["token_length_distribution"],
             "author_activity": eda["author_activity_distribution"],
             "top_tokens": eda["top_tokens_by_doc_frequency"],
-            "top_hashtags_by_hour": eda["top_hashtags_by_hour"],
-            "posts_per_hour": eda["posts_per_hour"],
+            "top_hashtags_by_day": eda["top_hashtags_by_day"],
+            "posts_per_day": eda["posts_per_day"],
         })
 
     replace(db, "model_info", load(final / "model_info.json"))
@@ -59,7 +59,8 @@ def main():
     replace(db, "topic_trend", load(final / "topic_trend.json"), [[("topic_id", ASCENDING), ("bucket", ASCENDING)]])
     replace(db, "burst_events", load(final / "burst_events.json"), [[("topic_id", ASCENDING)]])
     replace(db, "representative_posts", load(final / "representative_posts.json"), [[("topic_id", ASCENDING)]])
-    replace(db, "keyword_trend", load(final / "keyword_trend_hourly.json"))
+    replace(db, "daily_issues", load(final / "daily_issues.json"), [[("date", ASCENDING), ("topic_id", ASCENDING)]])
+    replace(db, "keyword_trend", load(final / "keyword_trend_daily.json"))
     replace(db, "hashtag_trend", load(final / "hashtag_trend.json"), [[("hashtag", ASCENDING), ("bucket", ASCENDING)]])
     replace(db, "scalability", load(rep / "scalability.json"))
 
@@ -67,7 +68,7 @@ def main():
     if registry.exists():
         with open(registry, encoding="utf-8", newline="") as f:
             rows = list(csv.DictReader(f))
-        runs = Path(cfg["paths"]["registry"]).parent / "runs"
+        runs = registry.parent / "runs"
         for r in rows:
             run = load(runs / f"{r['id']}.json")
             r["topics"] = run["topics"] if run else []

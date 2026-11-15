@@ -1,4 +1,4 @@
-"""Diễn biến – how every topic rose and fell through the day: stacked share,
+"""Diễn biến – how every topic rose and fell over time: stacked share,
 fixed-scale small multiples, and the BREAKING log."""
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ trend = trend[~trend["in_gap"]]
 bursts = data.bursts()
 cfg = data.one("model_info").get("config_trend", {})
 
-slug("Diễn biến trong ngày",
-     "Tỷ trọng của từng chủ đề theo khung 5 phút. Một khung được gọi là bùng nổ khi tỷ trọng vượt trung bình "
-     f"60 phút trước đó hơn {num(cfg.get('burst_zscore_threshold', 2.5))} độ lệch chuẩn, cao hơn mức nền ít nhất "
-     f"{int(round(100 * (cfg.get('burst_min_lift', 1.2) - 1)))}% và có ít nhất {cfg.get('burst_min_volume', 100)} bài.")
+slug("Diễn biến theo thời gian",
+     "Tỷ trọng của từng chủ đề theo ngày. Một khung được gọi là bùng nổ khi tỷ trọng vượt trung bình "
+     f"7 ngày trước đó hơn {num(cfg.get('burst_zscore_threshold', 2.5))} độ lệch chuẩn, cao hơn mức nền ít nhất "
+     f"{int(round(100 * (cfg.get('burst_min_lift', 1.2) - 1)))}% và có ít nhất {cfg.get('burst_min_volume', 20)} video.")
 
 t = state.scrubber()
 
@@ -31,16 +31,16 @@ fig = go.Figure()
 for r in named.itertuples():
     tt = trend[trend["topic_id"] == r.topic_id].sort_values("bucket")
     fig.add_trace(go.Scatter(x=tt["bucket"], y=tt["ratio"], name=r.topic_label, stackgroup="one", mode="lines",
-                             line=dict(width=0.5, color="#0B1B3A"), fillcolor=topic_color(int(r.size_rank)),
+                             line=dict(width=0.5, color="#FFFFFF"), fillcolor=topic_color(int(r.size_rank)),
                              hovertemplate=f"{r.topic_label}: %{{y:.1%}}<extra></extra>"))
 if not folded.empty:
     other = trend[trend["topic_id"].isin(folded["topic_id"])].groupby("bucket")["ratio"].sum().reset_index()
     fig.add_trace(go.Scatter(x=other["bucket"], y=other["ratio"], name=f"Khác ({len(folded)} chủ đề)",
-                             stackgroup="one", mode="lines", line=dict(width=0.5, color="#0B1B3A"), fillcolor=OTHER,
+                             stackgroup="one", mode="lines", line=dict(width=0.5, color="#FFFFFF"), fillcolor=OTHER,
                              hovertemplate="Khác: %{y:.1%}<extra></extra>"))
 fig.add_vline(x=t, line=dict(color=GOLD, width=3))
 fig.update_layout(height=430, yaxis=dict(tickformat=".0%", range=[0, 1], title="tỷ trọng"),
-                  xaxis=dict(tickformat="%H:%M"), legend=dict(y=-0.18))
+                  xaxis=dict(tickformat="%d/%m"), legend=dict(y=-0.18))
 st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
 
 first_bin, last_bin = trend["bucket"].min(), trend["bucket"].max()
@@ -62,19 +62,19 @@ for start_i in range(0, len(items), 3):
         tt = trend[trend["topic_id"] == r.topic_id].sort_values("bucket")
         fig = go.Figure(go.Scatter(x=tt["bucket"], y=tt["ratio"], mode="lines", showlegend=False,
                                    line=dict(color=topic_color(int(r.size_rank)), width=2),
-                                   hovertemplate=f"%{{x|%H:%M}} · %{{y:.1%}}<extra></extra>"))
+                                   hovertemplate=f"%{{x|%d/%m %H:%M}} giờ Việt Nam · %{{y:.1%}}<extra></extra>"))
         tb = bursts[bursts["topic_id"] == r.topic_id] if not bursts.empty else bursts
         for e in tb.itertuples():
-            fig.add_vrect(x0=e.start, x1=e.end + pd.Timedelta(minutes=5), fillcolor="#D41E35", opacity=0.3,
+            fig.add_vrect(x0=e.start, x1=e.end + pd.Timedelta(minutes=5), fillcolor=GOLD, opacity=0.16,
                           line_width=0)
         fig.update_layout(height=190, hovermode="closest", margin=dict(l=8, r=8, t=8, b=8),
                           yaxis=dict(range=[0, ymax], tickformat=".0%", nticks=4),
-                          xaxis=dict(range=[x0, x1], tickformat="%H:%M", nticks=5))
+                          xaxis=dict(range=[x0, x1], tickformat="%d/%m", nticks=5))
         with col:
             sub(r.topic_label)
             st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
-note("Mọi ô dùng chung trục tung từ 0 đến tỷ trọng lớn nhất trong ngày, nên chiều cao so sánh trực tiếp được. "
-     "Vùng đỏ là sự kiện bùng nổ.")
+note("Mọi ô dùng chung trục tung từ 0 đến tỷ trọng lớn nhất trong kỳ, nên chiều cao so sánh trực tiếp được. "
+     "Vùng xám nhạt là khoảng thời gian có sự kiện bùng nổ.")
 
 strap("Nhật ký bùng nổ")
 if bursts.empty:

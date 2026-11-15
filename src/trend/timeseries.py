@@ -1,5 +1,5 @@
 """Pure pandas time-series logic (plan sections 13–14). No Spark here, so it is
-unit-tested locally; Spark only produces the small hourly aggregates.
+unit-tested locally; Spark produces publication-day aggregates for the news dataset.
 """
 from __future__ import annotations
 

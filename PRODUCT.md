@@ -17,7 +17,7 @@ Streamlit + Plotly (Python), reading aggregated results from MongoDB. Chosen in 
 
 ## Product Purpose
 
-Analyze topics in Vietnamese-language YouTube videos and comments across broad subject areas, track how their volume changes over time, identify bursts, and present interpretable results through a dashboard. The project is an academic sample, not a representative measure of public opinion.
+Analyze topics in Vietnamese-language YouTube news-video titles from selected official channels, track how their volume changes over time, identify bursts, and present interpretable results through a dashboard. The project is an academic sample, not a representative measure of public opinion.
 
 ## Positioning
 
@@ -27,7 +27,7 @@ Every number on screen comes from the team's own Spark pipeline over HDFS, with 
 
 - Live demo in the course defense (week 10), plus screenshots inside the Word report and slides.
 - The dashboard must run without the Spark cluster: it reads MongoDB, and the Text Analyzer loads a local copy of the model.
-- Dataset: public YouTube videos and top-level comments found through YouTube Data API v3 queries in seven topic areas. The analysis window and resulting sample are determined by the local collection configuration.
+- Dataset: the selected official-news CSV with publication timestamps, channel identity and public engagement snapshots; 104,790 videos in the 14 October 2026 snapshot. The analysis window and resulting sample are determined by the local collection configuration.
 
 ## Capabilities and Constraints
 

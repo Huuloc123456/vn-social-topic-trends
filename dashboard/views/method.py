@@ -8,7 +8,7 @@ import streamlit as st
 
 from dashboard import data
 from dashboard.components import fmt_int, fmt_pct, html, insight, note, slug, strap, strip, sub, table
-from dashboard.theme import GOLD, INK, PLOTLY_CONFIG, SERIES
+from dashboard.theme import GOLD, INK, INK_2, PLOTLY_CONFIG, SERIES
 
 dq = data.one("data_quality")
 info = data.one("model_info")
@@ -22,15 +22,12 @@ slug("Dữ liệu và phương pháp",
 
 strap("Phễu chất lượng dữ liệu")
 RULE_VI = {
-    "Raw records": ("Bản ghi thô", "JSONL trên HDFS"),
-    "Corrupt / parse error (JSON)": ("Lỗi đọc JSON / thời gian không hợp lệ", ""),
-    "Duplicate post (uri)": ("Bản ghi trùng (cùng uri)", "uri là khóa duy nhất của bản ghi YouTube"),
-    "Missing / empty text": ("Không có nội dung chữ", "bản ghi không có văn bản"),
-    "Missing timestamp": ("Thiếu thời gian đăng", ""),
+    "News CSV records": ("Video trong CSV thời sự", "CSV hiện tại trên HDFS"),
+    "Invalid news CSV record": ("Thiếu hoặc sai thông tin video", "kiểm tra ID, tiêu đề, kênh, thời gian và số tương tác"),
+    "Duplicate video ID": ("Lặp cùng video ID", "giữ bài cùng tiêu đề nếu đến từ các kênh khác nhau"),
     "Timestamp outside collection window": ("Ngoài khung thu thập", "thời gian nằm ngoài khoảng đã cấu hình"),
-    "Non-Vietnamese / unknown language": ("Không phải tiếng Việt", "fastText lid.176, độ tin cậy ≥ 0,5"),
+    "Non-Vietnamese / unknown language (model only)": ("Không đủ độ tin cậy tiếng Việt cho mô hình", "vẫn giữ trong thống kê video"),
     "Clean dataset for volume statistics": ("Tập sạch cho thống kê", ""),
-    "Duplicate text (normalised)": ("Trùng nội dung (sau chuẩn hóa)", "chỉ loại khỏi tập huấn luyện"),
     "Clean dataset for model": ("Tập sạch cho mô hình", ""),
 }
 
@@ -62,14 +59,14 @@ insight(f"Từ {fmt_int(raw)} bản ghi thô còn <b>{fmt_int(dq['clean_volume']
         f"({fmt_pct(dq['retention_volume_pct'] / 100)}) và <b>{fmt_int(dq['clean_model'])}</b> bản ghi cho mô hình "
         f"({fmt_pct(dq['retention_model_pct'] / 100)}).")
 note("Bản ghi bị loại không biến mất: mỗi bước được đóng dấu HỦY kèm số lượng, theo đúng thứ tự thực thi trong "
-     "src/etl/clean.py. Bài trùng nội dung chỉ bị loại khỏi tập huấn luyện, vẫn được đếm trong thống kê.")
+     "src/etl/clean.py. Tiêu đề giống nhau từ các kênh khác nhau được giữ trong thống kê và tập huấn luyện.")
 
 left, right = st.columns([1, 1], gap="large")
 with left:
     sub("Ngôn ngữ trong tập dữ liệu hợp lệ")
     lang = pd.DataFrame(dq["language_distribution"]).head(10).iloc[::-1]
     fig = go.Figure(go.Bar(x=lang["share_pct"] / 100, y=lang["lang"], orientation="h",
-                           marker=dict(color=["#3987e5" if l == "vi" else "#2F4A80" for l in lang["lang"]],
+                           marker=dict(color=[INK if l == "vi" else "#C4C4C4" for l in lang["lang"]],
                                        line=dict(width=0)),
                            text=[fmt_pct(v / 100) for v in lang["share_pct"]], textposition="outside",
                            textfont=dict(color=INK, size=15), hovertemplate="%{y}: %{x:.1%}<extra></extra>",
@@ -78,22 +75,21 @@ with left:
                       xaxis=dict(visible=False, range=[0, float(lang["share_pct"].max()) / 100 * 1.2]),
                       yaxis=dict(tickfont=dict(size=16, color=INK)), margin=dict(r=8))
     st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
-    note("Nhận diện bằng fastText lid.176, giữ bản ghi tiếng Việt có độ tin cậy ≥ 0,5. “unknown”: quá ngắn để nhận diện.")
+    note("fastText lid.176 chỉ lọc ngôn ngữ cho tập mô hình. Thống kê giữ toàn bộ video hợp lệ trong CSV.")
 with right:
-    sub("Mức độ hoạt động của tài khoản")
+    sub("Số video theo kênh đăng")
     act = pd.DataFrame(eda.get("author_activity", []))
     order = ["1", "2-5", "6-20", "21-100", ">100"]
     act["o"] = act["posts_per_author"].map({k: i for i, k in enumerate(order)})
     act = act.sort_values("o")
-    fig = go.Figure(go.Bar(x=act["posts_per_author"], y=act["count"], marker=dict(color="#3987e5", line=dict(width=0)),
+    fig = go.Figure(go.Bar(x=act["posts_per_author"], y=act["count"], marker=dict(color=INK_2, line=dict(width=0)),
                            text=[fmt_int(c) for c in act["count"]], textposition="outside",
                            textfont=dict(color=INK, size=15), hovertemplate="%{x} bài: %{y:,} tài khoản<extra></extra>",
                            cliponaxis=False))
     fig.update_layout(height=400, showlegend=False, hovermode="closest", yaxis=dict(visible=False),
-                      xaxis=dict(title="số bản ghi mỗi tác giả trong khung thu thập", type="category"))
+                      xaxis=dict(title="số video mỗi kênh trong khung thu thập", type="category"))
     st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
-    note(f"{dq['high_activity_accounts']} tài khoản đăng hơn {int(dq['high_activity_threshold_posts'])} bài được gắn "
-         "cờ hoạt động cao (top 0,1%) – chỉ gắn cờ, không gọi là bot và không loại bỏ.")
+    note("Các kênh báo/đài đăng nhiều vẫn được giữ. Số kênh khác nhau cùng đưa tin được hiển thị ở bảng xu hướng.")
 
 strap("Thực nghiệm và lựa chọn mô hình")
 if reg.empty:

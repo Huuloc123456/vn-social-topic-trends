@@ -1,5 +1,4 @@
-"""Text Analyzer inference (plan 12.4): a local SparkSession loads the final
-PipelineModel copied to models/, so the demo needs no cluster."""
+"""Text Analyzer loads saved models and uses the configured Spark master."""
 from __future__ import annotations
 
 import json
@@ -9,20 +8,26 @@ from pathlib import Path
 import numpy as np
 import streamlit as st
 
-MODEL_DIR = Path(os.environ.get("MODEL_DIR", Path(__file__).resolve().parent.parent / "models"))
+MODEL_DIR = Path(os.environ.get("MODEL_DIR", Path(__file__).resolve().parent.parent / "models/youtube_news"))
 
 
 def model_ready() -> bool:
     return (MODEL_DIR / "final" / "metadata").exists()
 
 
-@st.cache_resource(show_spinner="Đang nạp mô hình Spark cục bộ (chỉ lần đầu)…")
+@st.cache_resource(show_spinner="Đang kết nối Spark và nạp mô hình (chỉ lần đầu)…")
 def _load():
     from pyspark.ml import PipelineModel
     from pyspark.sql import SparkSession
 
-    spark = (SparkSession.builder.master("local[1]").appName("dashboard-analyzer")
-             .config("spark.driver.memory", "1g").config("spark.ui.enabled", "false")
+    spark = (SparkSession.builder.master(os.environ.get("SPARK_MASTER_URL", "local[1]"))
+             .appName("dashboard-analyzer")
+             .config("spark.driver.memory", "1g")
+             .config("spark.driver.host", os.environ.get("SPARK_DRIVER_HOST", "127.0.0.1"))
+             .config("spark.driver.bindAddress", "0.0.0.0")
+             .config("spark.executor.memory", "1g").config("spark.executor.cores", "1")
+             .config("spark.cores.max", "2").config("spark.sql.shuffle.partitions", "2")
+             .config("spark.ui.enabled", "true").config("spark.ui.port", "4041")
              .config("spark.hadoop.fs.defaultFS", "file:///").getOrCreate())
     spark.sparkContext.setLogLevel("ERROR")
     final = PipelineModel.load(f"file://{MODEL_DIR / 'final'}")

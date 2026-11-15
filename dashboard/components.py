@@ -1,4 +1,4 @@
-"""HTML building blocks of the live-desk world (rendered with st.markdown)."""
+"""HTML building blocks shared by the dashboard pages."""
 from __future__ import annotations
 
 from html import escape
@@ -36,7 +36,7 @@ def fmt_pct(x: float, digits: int = 1) -> str:
 
 
 def hhmm(ts) -> str:
-    return pd.Timestamp(ts).strftime("%H:%M")
+    return pd.Timestamp(ts).strftime("%d/%m %H:%M")
 
 
 def slug(title: str, dek: str | None = None) -> None:
@@ -65,8 +65,8 @@ def strip(items: list[tuple[str, str]]) -> None:
     html(f'<div class="strip">{cells}</div>')
 
 
-UP = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 10 L1 10 Z" fill="#C5D3EE"/></svg>'
-DOWN = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 2 L11 2 L6 11 Z" fill="#93A8D2"/></svg>'
+UP = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 10 L1 10 Z" fill="currentColor"/></svg>'
+DOWN = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 2 L11 2 L6 11 Z" fill="currentColor"/></svg>'
 
 
 def story(label: str) -> str:
@@ -111,8 +111,7 @@ def scoreboard(rows: pd.DataFrame, value_col: str, selected: int | None = None,
 
 
 def rail(bins: list, events: pd.DataFrame, t) -> None:
-    """Broadcast time rail under the scrubber: hour ticks, a red pip at every
-    burst peak and the gold 'now' mark, on the same 0–100% scale as the slider."""
+    """Time rail under the scrubber with neutral marks for bursts and the selected time."""
     n = max(len(bins) - 1, 1)
     pos = {pd.Timestamp(b): 100 * i / n for i, b in enumerate(bins)}
     marks = []
@@ -150,7 +149,7 @@ def burst_log(events: pd.DataFrame) -> None:
         rows.append(
             f'<div class="slate"><time>{hhmm(e.peak)}</time><div class="what"><b>{escape(e.topic_label)}</b>'
             f'<span>Từ {hhmm(e.start)} đến {hhmm(e.end)} · tỷ trọng {fmt_pct(e.peak_ratio)} so với nền '
-            f'{fmt_pct(e.baseline_ratio)} của 60 phút trước</span></div><div class="z">z {num(e.max_burst_score)}</div></div>')
+            f'{fmt_pct(e.baseline_ratio)} của 7 ngày trước</span></div><div class="z">z {num(e.max_burst_score)}</div></div>')
     html("".join(rows) or '<p class="note">Không có sự kiện nào vượt ngưỡng.</p>')
 
 
@@ -158,8 +157,10 @@ def quotes(posts: pd.DataFrame) -> None:
     out = []
     for p in posts.itertuples():
         text = data.mask_text(p.text) if safe_mode() else p.text
-        out.append(f'<div class="quote"><p>{escape(text)}</p><span>{hhmm(p.created_at)} UTC · '
-                   f'độ gần tâm cụm {num(p.score, 2)}</span></div>')
+        author = escape(str(getattr(p, "author", "")))
+        link = escape(str(getattr(p, "video_url", "")), quote=True)
+        out.append(f'<div class="quote"><p>{escape(text)}</p><span>{author} · {hhmm(p.created_at)} giờ Việt Nam · '
+                   f'độ gần tâm cụm {num(p.score, 2)} · <a href="{link}" target="_blank" rel="noopener noreferrer">Mở video</a></span></div>')
     html("".join(out))
 
 

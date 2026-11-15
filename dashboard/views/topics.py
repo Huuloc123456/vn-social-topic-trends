@@ -22,17 +22,17 @@ from dashboard.components import (
     strip,
     sub,
 )
-from dashboard.theme import GOLD, PLOTLY_CONFIG, RULE, topic_color
+from dashboard.theme import GOLD, INK, PLOTLY_CONFIG, RULE, topic_color
 
 topics = data.topics()
 info = data.one("model_info")
 trend = data.trend()
 bursts = data.bursts()
 
-slug("Các câu chuyện trong ngày",
+slug("Các câu chuyện trong tập dữ liệu",
      f"{len(topics)} chủ đề do mô hình {info.get('model', '')} tìm ra trên {fmt_int(info.get('posts_assignable', 0))} "
      f"bài gán được chủ đề (trong {fmt_int(info.get('posts_scored', 0))} bài hợp lệ; số còn lại không có từ nào "
-     "trong từ vựng của mô hình). Xếp theo tỷ trọng cả ngày; chọn một chủ đề để mở hồ sơ.")
+     "trong từ vựng của mô hình). Xếp theo tỷ trọng toàn kỳ; chọn một chủ đề để mở hồ sơ.")
 
 labels = {int(r.topic_id): r.topic_label for r in topics.itertuples()}
 scoreboard(topics.assign(value=topics["share"]), "value",
@@ -50,9 +50,9 @@ color = topic_color(int(row["size_rank"]))
 
 topic_bursts = bursts[bursts["topic_id"] == chosen] if not bursts.empty else bursts
 strip([
-    ("tỷ trọng cả ngày", fmt_pct(row["share"])),
+    ("tỷ trọng toàn kỳ", fmt_pct(row["share"])),
     ("số bài (ước tính)", fmt_int(row["size"])),
-    ("đỉnh trong ngày", f"{hhmm(row['peak_bucket'])} · {fmt_pct(row['peak_ratio'])}"),
+    ("đỉnh trong kỳ", f"{hhmm(row['peak_bucket'])} · {fmt_pct(row['peak_ratio'])}"),
     ("sự kiện bùng nổ", str(len(topic_bursts))),
     ("độ mạch lạc NPMI", f"{row['npmi']:.3f}".replace(".", ",")),
 ])
@@ -64,7 +64,7 @@ with left:
     weights = list(range(len(kws), 0, -1))
     fig = go.Figure(go.Bar(x=weights, y=kws, orientation="h", marker=dict(color=color, line=dict(width=0)),
                            text=kws, textposition="inside", insidetextanchor="start",
-                           textfont=dict(size=17, color="#FFFFFF"), hoverinfo="skip", cliponaxis=False))
+                           textfont=dict(size=17, color=INK), hoverinfo="skip", cliponaxis=False))
     fig.update_layout(height=40 * len(kws) + 20, showlegend=False, bargap=0.18,
                       xaxis=dict(visible=False), yaxis=dict(visible=False, autorange="reversed"))
     st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
@@ -72,21 +72,21 @@ with left:
          "từ xuất hiện nhiều trong chủ đề này nhưng hiếm ở các chủ đề khác.")
 
 with right:
-    sub("Diễn biến trong ngày")
+    sub("Diễn biến theo thời gian")
     tt = trend[trend["topic_id"] == chosen].sort_values("bucket")
     tt = tt[~tt["in_gap"]]
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=tt["bucket"], y=tt["ratio"], mode="lines", line=dict(color=color, width=2.5),
-                             name=row["topic_label"], hovertemplate="%{x|%H:%M} · %{y:.1%}<extra></extra>"))
+                             name=row["topic_label"], hovertemplate="%{x|%d/%m %H:%M} giờ Việt Nam · %{y:.1%}<extra></extra>"))
     for e in topic_bursts.itertuples():
         fig.add_vrect(x0=e.start, x1=e.end + (tt["bucket"].iloc[1] - tt["bucket"].iloc[0]),
-                      fillcolor="#D41E35", opacity=0.22, line_width=0)
-    fig.update_layout(height=320, showlegend=False, yaxis=dict(tickformat=".0%", title="tỷ trọng / 5 phút",
+                      fillcolor=GOLD, opacity=0.16, line_width=0)
+    fig.update_layout(height=320, showlegend=False, yaxis=dict(tickformat=".0%", title="tỷ trọng / ngày",
                                                                rangemode="tozero"),
-                      xaxis=dict(tickformat="%H:%M"))
+                      xaxis=dict(tickformat="%d/%m"))
     st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
     insight(f"{story(row['topic_label'])} đạt đỉnh lúc <b>{hhmm(row['peak_bucket'])}</b> với "
-            f"{fmt_pct(row['peak_ratio'])} số bài của khung 5 phút đó. Vùng đỏ là các sự kiện bùng nổ.")
+            f"{fmt_pct(row['peak_ratio'])} số bài của khung ngày đó. Vùng xám nhạt là các sự kiện bùng nổ.")
     if not topic_bursts.empty:
         burst_log(topic_bursts)
 

@@ -118,12 +118,11 @@ services:
     ports:
       - "127.0.0.1:27018:27017"
     volumes:
-      - mongo:/data/db
+      - mongo_youtube:/data/db
     mem_limit: 1g
     networks: [bigdata]
 
-  # The dashboard needs only MongoDB and the local model copy (plan 12.4),
-  # never HDFS or the Spark cluster.
+  # Text Analyzer registers a client-mode application with the Spark cluster.
   dashboard:
     <<: *spark-common
     hostname: dashboard
@@ -132,19 +131,22 @@ services:
       - ..:/app
     environment:
       MONGO_URI: mongodb://mongodb:27017
-      MODEL_DIR: /app/models
+      MODEL_DIR: /app/models/youtube_news
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_DRIVER_HOST: dashboard
       # pyspark ships inside /opt/spark/python; spark-submit adds it, streamlit does not.
       PYTHONPATH: /app:/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
     ports:
       - "127.0.0.1:8501:8501"
-    depends_on: [mongodb]
+      - "127.0.0.1:4041:4041"
+    depends_on: [mongodb, spark-master, spark-worker-1, spark-worker-2]
     mem_limit: 2g
 
 volumes:
   namenode:
   datanode1:
   datanode2:
-  mongo:
+  mongo_youtube:
 
 networks:
   bigdata:

@@ -1,106 +1,159 @@
-"""Bảng điểm – the first viewport: the running scoreboard of topic share,
-the day scrubber under it, and the BREAKING crawl pinned to the bottom edge."""
+"""Daily and monthly issues found in the Vietnamese YouTube sample."""
 from __future__ import annotations
 
+import calendar
+from collections import Counter
+
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 
-from dashboard import data, state
-from dashboard.components import (
-    fmt_int,
-    fmt_pct,
-    hhmm,
-    insight,
-    note,
-    rail,
-    scoreboard,
-    slug,
-    story,
-    strap,
-    strip,
-    ticker,
-)
-from dashboard.theme import GOLD, PLOTLY_CONFIG
+from dashboard import data
+from dashboard.components import fmt_int, note, slug, strap
 
-topics = data.topics()
-trend = data.trend()
-bursts = data.bursts()
-dq = data.one("data_quality")
+
+def summarize(rows: pd.DataFrame) -> dict[int, dict]:
+    result = {}
+    for topic_id, group in rows.groupby("topic_id"):
+        words: dict[str, float] = {}
+        labels: Counter[str] = Counter()
+        examples = []
+        channels = set()
+        for row in group.itertuples():
+            channels.update(row.channel_ids or [])
+            if row.label and row.label != "Chủ đề chưa rõ":
+                labels[row.label] += int(row.count)
+            for rank, word in enumerate(row.keywords or []):
+                words[word] = words.get(word, 0) + float(row.count) / (rank + 1)
+            examples.extend(
+                {**example, "created_at": example.get("created_at") or str(row.date)}
+                for example in row.examples or []
+            )
+        keywords = sorted(words, key=words.get, reverse=True)[:6]
+        result[int(topic_id)] = {
+            "issue": labels.most_common(1)[0][0] if labels else "Chủ đề chưa rõ",
+            "count": int(group["count"].sum()),
+            "channel_count": len(channels),
+            "keywords": keywords,
+            "examples": sorted(examples, key=lambda item: item.get("view_count") or 0, reverse=True),
+        }
+    return result
+
+
+def ranking(current: dict[int, dict], previous: dict[int, dict]) -> pd.DataFrame:
+    rows = []
+    for topic_id, issue in current.items():
+        before = previous.get(topic_id, {}).get("count", 0)
+        delta = issue["count"] - before
+        rows.append({
+            "Vấn đề nổi bật": issue["issue"],
+            "Số bài": issue["count"],
+            "Số kênh": issue["channel_count"],
+            "Kỳ trước": before,
+            "Tăng/giảm": f"{delta:+,}".replace(",", "."),
+            "Tăng trưởng": f"{(100 * delta / before):+.0f}%" if before else ("Mới" if issue["count"] else "–"),
+            "_growth": delta / before if before else float("inf"),
+            "_delta": delta,
+            "topic_id": topic_id,
+        })
+    return pd.DataFrame(rows)
+
+
+issues = data.daily_issues()
+slug("Vấn đề xã hội nổi bật theo thời gian",
+     "Tóm tắt theo ngày hoặc tháng từ tiêu đề video từ các kênh thời sự Việt Nam. "
+     "Tên vấn đề lấy từ video đại diện trong từng kỳ; từ khóa và nội dung mẫu giúp đối chiếu.")
+note("Số bài và số kênh được tính cho cả cụm chủ đề. Tiêu đề minh họa không có nghĩa mọi video trong cụm đều nói về đúng một sự kiện.")
 overview = data.one("overview")
-info = data.one("model_info")
+last_video = pd.to_datetime(overview["last_post"], utc=True).tz_convert("Asia/Ho_Chi_Minh")
+st.caption(f"Nguồn hiện tại: {fmt_int(overview['posts'])} video từ {overview['authors']} kênh; "
+           f"video mới nhất lúc {last_video:%d/%m/%Y %H:%M} giờ Việt Nam. Ngày/tháng cuối chưa đủ cả kỳ.")
 
-MODES = ["Tích lũy tới thời điểm này", "Trong 5 phút này"]
-t = state.current_time()
-mode = st.session_state.get("board_mode", MODES[0])
+if issues.empty:
+    st.info("Chưa có phân tích theo ngày. Hãy chạy lại bước tổng hợp cuối và nạp kết quả vào dashboard.")
+    st.stop()
 
-slug("YouTube Việt Nam đang thảo luận gì",
-     f"{len(topics)} chủ đề từ {fmt_int(overview['posts'])} video và bình luận tiếng Việt. Kéo thanh thời gian bên dưới "
-     "để xem diễn biến theo thời gian.")
-
-earlier = t - pd.Timedelta(minutes=60)
-prev = trend[trend["bucket"] == earlier].set_index("topic_id")["ratio"]
-cur = trend[trend["bucket"] == t].set_index("topic_id")["ratio"]
-if mode == MODES[0]:
-    upto = trend[trend["bucket"] <= t]
-    agg = upto.groupby("topic_id")["count"].sum()
-    share = agg / agg.sum()
-    agg_prev = trend[trend["bucket"] <= earlier].groupby("topic_id")["count"].sum()
-    share_prev = agg_prev / agg_prev.sum() if not agg_prev.empty else pd.Series(dtype=float)
-    label_now = f"tích lũy từ {hhmm(trend['bucket'].min())} tới {hhmm(t)}"
+issues["date"] = pd.to_datetime(issues["date"])
+available_days = sorted(issues["date"].dt.normalize().unique())
+period = st.radio("Xem theo", ["Ngày", "Tháng"], horizontal=True, key="issue_period")
+if period == "Ngày":
+    selected = pd.Timestamp(st.selectbox(
+        "Ngày (giờ Việt Nam)", available_days, index=len(available_days) - 1,
+        format_func=lambda value: pd.Timestamp(value).strftime("%d/%m/%Y"), key="issue_day"))
+    start, end = selected, selected + pd.Timedelta(days=1)
+    previous_start, previous_end = start - pd.Timedelta(days=1), start
+    period_name = selected.strftime("%d/%m/%Y")
 else:
-    share, share_prev = cur, prev
-    label_now = f"trong khung {hhmm(t)}–{hhmm(t + pd.Timedelta(minutes=5))}"
-movers = (share - share_prev).dropna().to_dict() if not share_prev.empty else {}
+    available_months = sorted(issues["date"].dt.to_period("M").unique())
+    month = st.selectbox("Tháng (giờ Việt Nam)", available_months,
+                         index=len(available_months) - 1,
+                         format_func=lambda value: f"{calendar.month_name[value.month]} {value.year}",
+                         key="issue_month")
+    start = month.start_time.normalize()
+    end = (month + 1).start_time.normalize()
+    previous_start = (month - 1).start_time.normalize()
+    previous_end = start
+    period_name = f"{calendar.month_name[month.month]} {month.year}"
 
-board = topics.set_index("topic_id").assign(value=share).fillna({"value": 0}).reset_index()
-live = bursts[(bursts["start"] <= t) & (bursts["end"] >= t)] if not bursts.empty else bursts
-scoreboard(board, "value", burst_topics=set(live["topic_id"]) if not live.empty else set(),
-           show_keywords=False, movers=movers)
+current_rows = issues[(issues["date"] >= start) & (issues["date"] < end)]
+previous_rows = issues[(issues["date"] >= previous_start) & (issues["date"] < previous_end)]
+current = summarize(current_rows)
+previous = summarize(previous_rows)
+if not current:
+    st.info("Kỳ này chưa có bài được gán chủ đề.")
+    st.stop()
 
-c1, c2 = st.columns([3, 1.1], vertical_alignment="top")
-with c1:
-    state.scrubber()
-    rail(state.bins(), bursts, t)
-with c2:
-    st.radio("Cách đếm", MODES, key="board_mode")
+strap(f"{period_name}: chủ đề được đưa tin nhiều nhất trong mẫu")
+popular = ranking(current, previous).sort_values(["Số bài", "topic_id"], ascending=[False, True]).head(5)
+st.dataframe(popular.drop(columns=["topic_id", "_growth", "_delta"]), hide_index=True, use_container_width=True)
 
-leader = board.sort_values("value", ascending=False).iloc[0]
-sentence = f"Dẫn đầu {label_now}: {story(leader['topic_label'])} với {fmt_pct(leader['value'])} số bài."
-if not prev.empty:
-    delta = (cur - prev).dropna()
-    mover = delta.idxmax()
-    mover_label = topics.set_index("topic_id").loc[mover, "topic_label"]
-    sentence += (f" So với {hhmm(earlier)}, chủ đề tăng mạnh nhất trong khung 5 phút là {story(mover_label)} "
-                 f"({fmt_pct(prev[mover])} → {fmt_pct(cur[mover])}).")
-insight(sentence)
-note("Mũi tên: thay đổi tỷ trọng (điểm phần trăm) so với 60 phút trước. Vạch đỏ trên thanh thời gian: các sự kiện "
-     "bùng nổ. Tỷ trọng tính trên các bài gán được chủ đề.")
+strap(f"{period_name}: vấn đề tăng nhanh nhất so với kỳ trước")
+if not previous:
+    note("Chưa có dữ liệu kỳ trước để tính mức tăng.")
+else:
+    movers = ranking(current, previous)
+    movers = movers[(movers["Kỳ trước"] > 0) & (movers["Số bài"] >= 5) & (movers["_delta"] > 0)]
+    if movers.empty:
+        note("Chưa có vấn đề đủ dữ liệu ở cả hai kỳ để tính tốc độ tăng.")
+    else:
+        movers = movers.sort_values(["_growth", "_delta"], ascending=False).head(5)
+        st.dataframe(movers.drop(columns=["topic_id", "_growth", "_delta"]),
+                     hide_index=True, use_container_width=True)
 
-strip([
-    ("bài đăng thô thu thập", fmt_int(dq["raw_records"])),
-    ("bản ghi tiếng Việt hợp lệ", fmt_int(dq["clean_volume"])),
-    ("tài khoản", fmt_int(overview["authors"])),
-    ("chủ đề (" + info.get("model", "") + ")", str(len(topics))),
-    ("sự kiện bùng nổ", str(len(bursts))),
-])
+if period == "Tháng":
+    strap("Vấn đề dẫn đầu từng ngày trong tháng")
+    daily_rows = []
+    for day, group in current_rows.groupby("date"):
+        daily = summarize(group)
+        topic_id, issue = max(daily.items(), key=lambda item: item[1]["count"])
+        daily_rows.append({"Ngày": day.strftime("%d/%m/%Y"), "Vấn đề nổi bật": issue["issue"],
+                           "Số bài": issue["count"]})
+    st.dataframe(pd.DataFrame(daily_rows), hide_index=True, use_container_width=True)
 
-strap("Nhịp đăng bài trong ngày")
-ppb = data.posts_per_bin()
-fig = go.Figure()
-fig.add_trace(go.Bar(x=ppb["bucket"], y=ppb["posts"], name="Bài / 5 phút",
-                     marker=dict(color=["#5B6F99" if g else "#3987e5" for g in ppb["is_gap"]], line=dict(width=0)),
-                     hovertemplate="%{x|%H:%M} · %{y:,} bài<extra></extra>"))
-fig.add_vline(x=t, line=dict(color=GOLD, width=3))
-fig.update_layout(height=300, bargap=0.12, showlegend=False, hovermode="closest",
-                  yaxis=dict(title="bài mỗi 5 phút", tickformat=","), xaxis=dict(tickformat="%H:%M"))
-st.plotly_chart(fig, config=PLOTLY_CONFIG, use_container_width=True)
-valid = ppb[~ppb["is_gap"]]
-peak = valid.sort_values("posts").iloc[-1]
-first = valid.iloc[1]
-insight(f"Lượng bài tăng dần khi trời sáng ở Bắc Mỹ (07:50 UTC là 02:50 giờ New York): từ {fmt_int(first['posts'])} "
-        f"bài/5 phút lúc {hhmm(first['bucket'])} lên đỉnh <b>{fmt_int(peak['posts'])}</b> lúc {hhmm(peak['bucket'])}. "
-        f"Các khung xám sau {hhmm(ppb[ppb['is_gap']]['bucket'].min())} là lúc bộ thu thập dừng, không phải lúc "
-        "người dùng ngừng đăng.")
+strap("Bài và video minh họa")
+issue_options = sorted(current, key=lambda topic_id: current[topic_id]["count"], reverse=True)
+chosen = st.selectbox("Chọn vấn đề", issue_options,
+                      format_func=lambda topic_id: current[topic_id]["issue"], key="issue_example")
+issue = current[chosen]
+note("Từ khóa đặc trưng: " + (", ".join(issue["keywords"]) or "chưa đủ từ khóa để đặt tên rõ ràng"))
+shown = 0
+for example in issue["examples"]:
+    text = str(example.get("text", "")).strip()
+    if not text:
+        continue
+    created = pd.to_datetime(example["created_at"], utc=True).tz_convert("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M")
+    st.markdown(f"**{example.get('author', '')} · {created} giờ Việt Nam**")
+    views, likes = example.get("view_count"), example.get("like_count")
+    st.caption(f"Lượt xem: {fmt_int(views) if views is not None else 'không có số liệu'} · "
+               f"Lượt thích: {fmt_int(likes) if likes is not None else 'không có số liệu'} · số tích lũy lúc crawl")
+    st.write(text[:700] + ("…" if len(text) > 700 else ""))
+    post_id = str(example.get("post_id", ""))
+    if post_id.startswith("youtube:video:"):
+        video_id = post_id.rsplit(":", 1)[-1]
+        st.markdown(f"[Mở video trên YouTube](https://www.youtube.com/watch?v={video_id})")
+    shown += 1
+    if shown == 3:
+        break
 
-ticker(bursts[bursts["peak"] <= t] if not bursts.empty else bursts, onair=True)
+note("Mức tăng so với ngày hoặc tháng liền trước, tính trên cùng cụm chủ đề. "
+     "Nhãn dựa trên tiêu đề video đại diện, không phải khẳng định rằng toàn xã hội chỉ thảo luận các vấn đề này. "
+     "Dữ liệu được chọn theo kênh báo/đài; mức độ đưa tin trong mẫu không đại diện toàn bộ Việt Nam.")

@@ -7,6 +7,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -29,20 +30,37 @@ PAGES = [
 nav = st.navigation(PAGES, position="hidden")
 # Streamlit 1.39 marks the current page link only with a generated class, so
 # the on-air tab slab is keyed on the link's href instead.
-html(f'<style>.st-key-segrow a[href="{nav.url_path}"] {{ background:var(--ink) !important; }}'
-     f'.st-key-segrow a[href="{nav.url_path}"] p {{ color:var(--bg) !important; }}</style>')
+html(f'<style>.st-key-segrow a[href="{nav.url_path}"] {{ border-bottom:2px solid var(--ink) !important; }}'
+     f'.st-key-segrow a[href="{nav.url_path}"] p {{ color:var(--ink) !important; font-weight:700; }}</style>')
 
-if not data.available():
+dashboard_status = data.status()
+if dashboard_status != "ready":
     html('<div class="rundown"><div class="show"><b>YouTube Việt Nam</b></div></div>')
-    st.error("Chưa có dữ liệu trong MongoDB. Chạy pipeline (README, mục 'Chạy toàn bộ pipeline') rồi tải lại trang.")
+    if dashboard_status == "offline":
+        html('<div role="alert" style="margin:.75rem 0;padding:.75rem 1rem;background:#F5F5F5;'
+             'border:1px solid #D4D4D4;border-radius:3px;color:#171717">'
+             '<b>Dashboard chưa kết nối được MongoDB.</b></div>')
+        st.markdown("Khởi động MongoDB bằng `docker compose -f docker/docker-compose.yml up -d mongodb`, "
+                    "rồi tải lại trang.")
+    else:
+        html('<div role="status" style="margin:.75rem 0;padding:.75rem 1rem;background:#F5F5F5;'
+             'border:1px solid #D4D4D4;border-radius:3px;color:#171717">'
+             '<b>Chưa có đủ kết quả phân tích để hiển thị dashboard.</b></div>')
+        st.markdown("Chạy pipeline từ bước làm sạch đến xuất kết quả MongoDB theo mục "
+                    "**Process and analyze** trong README, sau đó tải lại trang.")
     st.stop()
 
-t = state.current_time()
+latest_post = data.one("overview").get("last_post")
+t = (
+    pd.to_datetime(latest_post, utc=True).tz_convert("Asia/Ho_Chi_Minh")
+    if latest_post
+    else state.current_time()
+)
 html(
     '<div class="rundown">'
     '<div class="show"><span class="live"><i></i>Phát lại</span>'
-    '<div><b>YouTube Việt Nam</b><br><span>Video và bình luận tiếng Việt</span></div></div>'
-    f'<div class="clock"><b>{t:%H:%M}</b><span>giờ UTC đang xem</span></div>'
+    '<div><b>YouTube Việt Nam</b><br><span>Tiêu đề video từ các kênh thời sự</span></div></div>'
+    f'<div class="clock"><b>{t:%d/%m/%Y}</b><span>ngày đăng · giờ Việt Nam</span></div>'
     '</div>'
 )
 

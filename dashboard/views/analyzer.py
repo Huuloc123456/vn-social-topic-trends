@@ -53,14 +53,14 @@ else:
     html(f'<div class="call"><b>{topics.loc[tid, "topic_label"]}</b>'
          f'<span>Mô hình chọn chủ đề này · cosine tới tâm cụm <em>{num(sims[tid], 2)}</em> · cách chủ đề kế tiếp '
          f'({topics.loc[runner, "topic_label"]}) <em>{num(sims[tid] - sims[runner], 2)}</em></span></div>')
-    win_color = color if int(topics.loc[tid, "size_rank"]) < 7 else "#C5D3EE"
+    win_color = color if int(topics.loc[tid, "size_rank"]) < 7 else "#A3A3A3"
     left, right = st.columns([1.2, 1], gap="large")
     with left:
         sub("Độ gần tới tâm từng chủ đề")
         order = ranked[:8][::-1]
         fig = go.Figure(go.Bar(
             x=[sims[i] for i in order], y=[topics.loc[i, "topic_label"] for i in order], orientation="h",
-            marker=dict(color=[win_color if i == tid else "#2F4A80" for i in order], line=dict(width=0)),
+            marker=dict(color=[win_color if i == tid else "#D4D4D4" for i in order], line=dict(width=0)),
             text=[num(sims[i], 2) for i in order], textposition="outside", textfont=dict(color=INK, size=15),
             hovertemplate="%{y}: %{x:.3f}<extra></extra>", cliponaxis=False))
         fig.update_layout(height=380, showlegend=False, hovermode="closest",
@@ -91,7 +91,7 @@ else:
     order = sorted(range(len(theta)), key=lambda i: -theta[i])
     top = order[:6]
     fig = go.Figure(go.Bar(x=[theta[i] for i in top][::-1], y=[labels.get(i, f"LDA {i}") for i in top][::-1],
-                           orientation="h", marker=dict(color="#9085e9", line=dict(width=0)),
+                           orientation="h", marker=dict(color="#525252", line=dict(width=0)),
                            text=[fmt_pct(theta[i]) for i in top][::-1], textposition="outside",
                            textfont=dict(color=INK, size=15), hovertemplate="%{y}: %{x:.1%}<extra></extra>",
                            cliponaxis=False))

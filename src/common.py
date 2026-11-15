@@ -1,7 +1,6 @@
 """Shared helpers: configuration, Spark session, MongoDB, experiment registry."""
 from __future__ import annotations
 
-import copy
 import csv
 import json
 import os
@@ -56,6 +55,7 @@ def get_spark(app_name: str, cfg: dict):
     return (
         SparkSession.builder.appName(app_name)
         .config("spark.sql.shuffle.partitions", cfg["spark"]["shuffle_partitions"])
+        .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )
 
@@ -122,7 +122,3 @@ class Timer:
 
     def __exit__(self, *exc):
         self.seconds = round(time.perf_counter() - self.start, 1)
-
-
-def cfg_snapshot(cfg: dict) -> dict:
-    return copy.deepcopy(cfg)

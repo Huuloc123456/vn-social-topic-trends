@@ -2,23 +2,22 @@
 # experiments override single keys from the command line.
 
 paths:
-  raw: hdfs:///social/raw/youtube
-  clean_volume: hdfs:///social/clean/volume
-  clean_model: hdfs:///social/clean/model
-  sample: hdfs:///social/sample_20
-  features: hdfs:///social/features
-  models: hdfs:///social/models
-  assignments: hdfs:///social/gold/assignments
-  reports_local: /app/reports
-  models_local: /app/models
-  registry: /app/experiments/experiment_results.csv
+  raw: hdfs:///social/raw/youtube_news/youtube_news_videos_clean.csv
+  clean_volume: hdfs:///social/youtube_news/clean/volume
+  clean_model: hdfs:///social/youtube_news/clean/model
+  sample: hdfs:///social/youtube_news/sample_20
+  features: hdfs:///social/youtube_news/features
+  models: hdfs:///social/youtube_news/models
+  assignments: hdfs:///social/youtube_news/gold/assignments
+  reports_local: /app/reports/youtube_news
+  models_local: /app/models/youtube_news
+  registry: /app/experiments/youtube_news/experiment_results.csv
   fasttext_model: /opt/models/lid.176.ftz
 
 dataset:
-  # The collector samples from June 1 through the current UTC date.
-  name: YouTube Vietnamese topics and comments sample
-  start: "2026-06-01 00:00:00"
-  end: "2026-10-12 00:00:00"
+  name: YouTube Vietnamese news video titles
+  start: "2023-01-01 00:00:00"
+  end: "2026-10-30 00:00:00"
 
 spark:
   shuffle_partitions: 32
@@ -34,7 +33,6 @@ preprocessing:
   use_bigram: false
   bigram_min_df: 20
   use_domain_stopwords: true
-  high_activity_quantile: 0.999
 
 features:
   vocab_size: 20000
@@ -71,22 +69,21 @@ evaluation:
   silhouette_sample: 200000
 
 trend:
-  # The data covers ~8 hours, so trends are intraday: 5-minute bins, baseline
-  # = the previous 60 minutes (12 bins). Daily / 48h windows do not apply.
-  primary_model: kmeans
-  bin_minutes: 5
-  rolling_window_bins: 12
-  min_periods: 6
+  # Daily publication bins in Vietnam time, compared with the previous week.
+  primary_model: w2v_kmeans
+  bin_minutes: 1440
+  rolling_window_bins: 7
+  min_periods: 3
   burst_zscore_threshold: 2.5
   std_floor_ratio: 0.1
-  burst_min_volume: 100
+  burst_min_volume: 20
   burst_min_lift: 1.2        # and >= 1.2x the baseline share (z alone flags +5% rises)
   merge_gap_bins: 2
   gap_volume_ratio: 0.2
-  gap_window_bins: 12
+  gap_window_bins: 7
 
 mongo:
-  database: social_topics
+  database: youtube_news_topics
 
 dashboard:
   representative_posts_per_topic: 15

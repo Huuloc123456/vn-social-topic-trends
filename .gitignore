@@ -24,3 +24,11 @@ reports/docker_*.log
 spark-warehouse/
 metastore_db/
 derby.log
+
+# Understand-Anything knowledge graph
+.ua/
+
+# Local export/review artifacts
+/word_report_work/
+/ppt-before.ndjson
+/ppt-after.ndjson
