@@ -115,6 +115,9 @@ experiments/         Registry thực nghiệm cục bộ (không commit)
 
 ## Tài liệu liên quan
 
+- [Báo cáo đồ án (Word)](docs/BaoCao_DoAn_BigData.docx)
+- [Báo cáo đồ án (PDF)](docs/BaoCao_DoAn_BigData.pdf)
+- [Slide thuyết trình (PowerPoint)](docs/slides/BigData-thuyet-trinh.pptx)
 - [Quy trình thu thập và phạm vi nguồn](crawl/README.md)
 - [Thiết kế giao diện](project_docs/DESIGN.md)
 - [Yêu cầu sản phẩm](project_docs/PRODUCT.md)

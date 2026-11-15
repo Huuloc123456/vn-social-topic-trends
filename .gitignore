@@ -3,7 +3,12 @@ data/exports/
 models/
 experiments/
 reports/
-docs/
+docs/*
+!docs/BaoCao_DoAn_BigData.docx
+!docs/BaoCao_DoAn_BigData.pdf
+!docs/slides/
+docs/slides/*
+!docs/slides/BigData-thuyet-trinh.pptx
 research_notes/
 .impeccable/
 .env
