@@ -5,14 +5,14 @@ experiments/
 reports/
 docs/*
 docs/slides/*
-ket_qua_nop/du_lieu/
-ket_qua_nop/phan_tich/
+/ket_qua_nop/data/exports/
 research_notes/
 .impeccable/
 .env
 .env.*
 !.env.example
 !config/.env.example
+!/ket_qua_nop/config/.env.example
 *.pem
 *.key
 .streamlit/secrets.toml
@@ -36,3 +36,11 @@ derby.log
 /word_report_work/
 /ppt-before.ndjson
 /ppt-after.ndjson
+
+# Include the small inference model in the runnable submission project.
+!/ket_qua_nop/models/
+!/ket_qua_nop/models/youtube_news/
+!/ket_qua_nop/models/youtube_news/**
+!/ket_qua_nop/reports/
+!/ket_qua_nop/reports/youtube_news/
+!/ket_qua_nop/reports/youtube_news/**

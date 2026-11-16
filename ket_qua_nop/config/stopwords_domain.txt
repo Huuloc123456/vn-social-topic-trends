@@ -1,0 +1,50 @@
+# Domain stopwords (plan 7.8). Platform vocabulary and conversational filler
+# Platform terms that can dominate across topics.
+# Experiment 1 compares the model with and without this list; refine it from
+# reports/eda.json -> top_tokens_by_doc_frequency.
+youtube
+video
+videos
+channel
+comment
+skeet
+skeets
+post
+posts
+amp
+via
+lol
+lmao
+im
+ive
+dont
+didnt
+cant
+gonna
+yeah
+oh
+ok
+okay
+yes
+really
+just
+like
+get
+got
+one
+also
+even
+still
+much
+would
+could
+thing
+things
+youre
+thats
+doesnt
+isnt
+wont
+theyre
+whats
+lets

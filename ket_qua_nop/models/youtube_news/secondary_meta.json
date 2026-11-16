@@ -1,0 +1,17 @@
+{
+  "run_id": "E06",
+  "model": "LDA",
+  "npmi": 0.1133,
+  "labels": {
+    "0": "bảo · an · đồng",
+    "1": "động · vàng · giá",
+    "2": "cần · xe · thơ",
+    "3": "đồng · hàng · công",
+    "4": "thời · ngày · sự",
+    "5": "nga · ukraine · quốc",
+    "6": "dân · phát · lũ",
+    "7": "hội · quốc · tỉnh",
+    "8": "mỹ · ông · trump",
+    "9": "truyền · hình · nam"
+  }
+}

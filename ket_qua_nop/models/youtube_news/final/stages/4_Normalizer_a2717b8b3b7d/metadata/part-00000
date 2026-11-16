@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.Normalizer","timestamp":1794729292162,"sparkVersion":"3.5.3","uid":"Normalizer_a2717b8b3b7d","paramMap":{"p":2.0,"outputCol":"features","inputCol":"w2v"},"defaultParamMap":{"p":2.0,"outputCol":"Normalizer_e573f87a1755__output"}}

@@ -117,9 +117,9 @@ experiments/         Registry thực nghiệm cục bộ (không commit)
 ## Tài liệu liên quan
 
 - [Thư mục kết quả để nộp](ket_qua_nop/README.md)
-- [Báo cáo đồ án (Word)](ket_qua_nop/BaoCao_DoAn_BigData.docx)
-- [Báo cáo đồ án (PDF)](ket_qua_nop/BaoCao_DoAn_BigData.pdf)
-- [Slide thuyết trình (PowerPoint)](ket_qua_nop/BigData-thuyet-trinh.pptx)
+- [Báo cáo đồ án (Word)](ket_qua_nop/docs/BaoCao_DoAn_BigData.docx)
+- [Báo cáo đồ án (PDF)](ket_qua_nop/docs/BaoCao_DoAn_BigData.pdf)
+- [Slide thuyết trình (PowerPoint)](ket_qua_nop/docs/slides/BigData-thuyet-trinh.pptx)
 - [Quy trình thu thập và phạm vi nguồn](crawl/README.md)
 - [Thiết kế giao diện](project_docs/DESIGN.md)
 - [Yêu cầu sản phẩm](project_docs/PRODUCT.md)

@@ -1,0 +1,38 @@
+{
+  "run_id": "E05",
+  "model": "Word2Vec+KMeans",
+  "k": 10,
+  "is_lda": false,
+  "vocab_size": 10023,
+  "npmi": 0.1726,
+  "silhouette": 0.1341,
+  "perplexity": null,
+  "posts_scored": 1263204,
+  "posts_assignable": 1263040,
+  "labels": {
+    "0": "thời · ngày · sự",
+    "1": "triển · công · tăng",
+    "2": "việt · nam · lễ",
+    "3": "hội · tỉnh · đại",
+    "4": "cần · thơ · học",
+    "5": "mỹ · nga · ukraine",
+    "6": "xe · nạn · cháy",
+    "7": "truyền · hình · giang",
+    "8": "mưa · bắc · tiết",
+    "9": "bắt · vụ · đối"
+  },
+  "runtime_s": 84.2,
+  "config_trend": {
+    "primary_model": "w2v_kmeans",
+    "bin_minutes": 1440,
+    "rolling_window_bins": 7,
+    "min_periods": 3,
+    "burst_zscore_threshold": 2.5,
+    "std_floor_ratio": 0.1,
+    "burst_min_volume": 20,
+    "burst_min_lift": 1.2,
+    "merge_gap_bins": 2,
+    "gap_volume_ratio": 0.2,
+    "gap_window_bins": 7
+  }
+}
