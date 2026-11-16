@@ -33,7 +33,7 @@ Kết quả pipeline đã có trong `reports/youtube_news/`: dữ liệu chất 
 
 Yêu cầu: Windows 10/11, Docker Desktop với Linux containers và tối thiểu 8 GB RAM.
 
-1. Từ thư mục `ket_qua_nop/`, chạy `scripts/run.bat` để khởi động Docker Compose và mở dashboard, HDFS, Spark.
+1. Từ thư mục `social-topic-trends/`, chạy `scripts/run.bat` để khởi động Docker Compose và mở dashboard, HDFS, Spark.
 2. Kết quả phân tích đã lưu trong `reports/youtube_news/`. Để nạp lại vào MongoDB sau khi khởi động dịch vụ:
 
    ```powershell

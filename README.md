@@ -96,7 +96,7 @@ crawl/              Tài liệu quy trình, nguồn thu thập và snapshot
 dashboard/          Ứng dụng Streamlit và các trang trực quan hóa
 docker/             Docker Compose, cấu hình Spark và Hadoop
 project_docs/       Tài liệu thiết kế và yêu cầu sản phẩm
-ket_qua_nop/        Hồ sơ báo cáo, slide, dataset và kết quả mô hình để nộp
+social-topic-trends/ Bản project độc lập, báo cáo, dataset và kết quả phân tích
 scripts/            Collector, exporter, pipeline và tiện ích khởi động
 src/                ETL, thống kê, mô hình, xu hướng và xuất MongoDB
 tests/              Kiểm tra logic xử lý và phân tích
@@ -116,10 +116,10 @@ experiments/         Registry thực nghiệm cục bộ (không commit)
 
 ## Tài liệu liên quan
 
-- [Thư mục kết quả để nộp](ket_qua_nop/README.md)
-- [Báo cáo đồ án (Word)](ket_qua_nop/docs/BaoCao_DoAn_BigData.docx)
-- [Báo cáo đồ án (PDF)](ket_qua_nop/docs/BaoCao_DoAn_BigData.pdf)
-- [Slide thuyết trình (PowerPoint)](ket_qua_nop/docs/slides/BigData-thuyet-trinh.pptx)
+- [Project và kết quả phân tích](social-topic-trends/README.md)
+- [Báo cáo đồ án (Word)](social-topic-trends/docs/BaoCao_DoAn_BigData.docx)
+- [Báo cáo đồ án (PDF)](social-topic-trends/docs/BaoCao_DoAn_BigData.pdf)
+- [Slide thuyết trình (PowerPoint)](social-topic-trends/docs/slides/BigData-thuyet-trinh.pptx)
 - [Quy trình thu thập và phạm vi nguồn](crawl/README.md)
 - [Thiết kế giao diện](project_docs/DESIGN.md)
 - [Yêu cầu sản phẩm](project_docs/PRODUCT.md)

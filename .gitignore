@@ -5,14 +5,14 @@ experiments/
 reports/
 docs/*
 docs/slides/*
-/ket_qua_nop/data/exports/
+/social-topic-trends/data/exports/
 research_notes/
 .impeccable/
 .env
 .env.*
 !.env.example
 !config/.env.example
-!/ket_qua_nop/config/.env.example
+!/social-topic-trends/config/.env.example
 *.pem
 *.key
 .streamlit/secrets.toml
@@ -38,9 +38,9 @@ derby.log
 /ppt-after.ndjson
 
 # Include the small inference model in the runnable submission project.
-!/ket_qua_nop/models/
-!/ket_qua_nop/models/youtube_news/
-!/ket_qua_nop/models/youtube_news/**
-!/ket_qua_nop/reports/
-!/ket_qua_nop/reports/youtube_news/
-!/ket_qua_nop/reports/youtube_news/**
+!/social-topic-trends/models/
+!/social-topic-trends/models/youtube_news/
+!/social-topic-trends/models/youtube_news/**
+!/social-topic-trends/reports/
+!/social-topic-trends/reports/youtube_news/
+!/social-topic-trends/reports/youtube_news/**
