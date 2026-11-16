@@ -4,11 +4,9 @@ models/
 experiments/
 reports/
 docs/*
-!docs/BaoCao_DoAn_BigData.docx
-!docs/BaoCao_DoAn_BigData.pdf
-!docs/slides/
 docs/slides/*
-!docs/slides/BigData-thuyet-trinh.pptx
+ket_qua_nop/du_lieu/
+ket_qua_nop/phan_tich/
 research_notes/
 .impeccable/
 .env
