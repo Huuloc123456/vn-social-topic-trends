@@ -53,4 +53,4 @@ Mở dashboard tại `http://127.0.0.1:8501`. Ứng dụng và pipeline không c
 
 - [Báo cáo Word](docs/BaoCao_DoAn_BigData.docx)
 - [Báo cáo PDF](docs/BaoCao_DoAn_BigData.pdf)
-- [Slide thuyết trình](docs/slides/BigData-thuyet-trinh.pptx)
+- [Slide thuyết trình](docs/slides/Phan_tich_xu_huong_chu_de_tren_mang_xa_hoi.pptx)
