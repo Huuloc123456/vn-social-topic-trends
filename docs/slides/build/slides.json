@@ -1,0 +1,882 @@
+﻿{
+ "strings": {
+  "course": "INTERNET OF THINGS",
+  "product": "KHOGUARD",
+  "tagline": "Giám sát kho hàng và an toàn kho lạnh bằng IoT",
+  "advisor": "GVHD: ………………………",
+  "members": "Nhóm 17 · Đề tài 42 — Thành viên: ………………………",
+  "chapterLabel": "Chương",
+  "thanks": "CẢM ƠN THẦY CÔ VÀ CÁC BẠN ĐÃ LẮNG NGHE!"
+ },
+ "slides": [
+  {
+   "kind": "slide",
+   "id": "01",
+   "title": "KhoGuard: Giám sát kho hàng và an toàn kho lạnh bằng IoT",
+   "layout": "cover",
+   "chapter": null,
+   "items": [
+    "Đồ án môn Internet of Things — Nhóm 17, Đề tài 42.",
+    "Mô hình quản lý 4 khu vực, 12 cửa và giám sát điều kiện môi trường.",
+    "Trọng tâm: bảo vệ người trong kho lạnh bằng quy tắc an toàn tại thiết bị.",
+    "Thực hiện bằng ESP32/Wokwi, PlatformIO, React, MQTT và MySQL."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Mô hình bốn khu vực của KhoGuard",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\02-so-do-bon-khu.svg"
+    }
+   ],
+   "notes": "Giới thiệu đây là đồ án mô phỏng toàn bộ luồng thiết bị → máy chủ → giao diện, tập trung kiểm chứng nguyên lý vận hành."
+  },
+  {
+   "kind": "slide",
+   "id": "02",
+   "title": "Nội dung trình bày",
+   "layout": "agenda",
+   "chapter": null,
+   "items": [
+    "Khảo sát và thiết kế hệ thống kho hàng thông minh.",
+    "Thiết kế an toàn và vận hành kho lạnh.",
+    "Triển khai mô hình KhoGuard.",
+    "Demo và kết quả kiểm thử.",
+    "Kết luận, giới hạn và hướng phát triển."
+   ],
+   "ordered": true,
+   "table": [],
+   "images": [
+    {
+     "alt": "Kiến trúc IoT bốn tầng",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\01-kien-truc-bon-tang.svg"
+    }
+   ],
+   "notes": "Đi từ bài toán và quy tắc an toàn tới cách triển khai, sau đó dùng demo và bằng chứng để đánh giá kết quả."
+  },
+  {
+   "kind": "section",
+   "chapter": {
+    "number": 1,
+    "title": "Khảo sát, phân tích và thiết kế hệ thống kho hàng thông minh"
+   }
+  },
+  {
+   "kind": "slide",
+   "id": "03",
+   "title": "Vì sao cần giám sát kho hàng bằng IoT?",
+   "layout": "text-img",
+   "chapter": {
+    "number": 1,
+    "title": "Khảo sát, phân tích và thiết kế hệ thống kho hàng thông minh"
+   },
+   "items": [
+    "Kho nhiều cửa và nhiều khu vực khó theo dõi bằng thao tác thủ công.",
+    "Cửa mở lâu gây thất thoát nhiệt và ảnh hưởng điều kiện bảo quản.",
+    "Thông tin ra/vào, môi trường và sức chứa thường nằm rời rạc.",
+    "Kho lạnh cần phát hiện người còn bên trong và hỗ trợ xử lý khẩn cấp."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Các khu cần giám sát trong mô hình",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\02-so-do-bon-khu.svg"
+    }
+   ],
+   "notes": "Nhấn mạnh nhu cầu gom thông tin về một màn hình và xử lý rủi ro tại cửa. Đây là bài toán khảo sát, chưa có số liệu tiết kiệm chi phí hoặc năng lượng thực tế."
+  },
+  {
+   "kind": "slide",
+   "id": "04",
+   "title": "Mục tiêu và các nhóm chức năng",
+   "layout": "text-img",
+   "chapter": {
+    "number": 1,
+    "title": "Khảo sát, phân tích và thiết kế hệ thống kho hàng thông minh"
+   },
+   "items": [
+    "Giám sát trạng thái cửa, nhiệt độ, độ ẩm và số người theo khu vực.",
+    "Kiểm soát ra/vào bằng RFID, đối chiếu với lịch ca.",
+    "Chặn đóng cửa khi còn người, có vật cản hoặc tín hiệu chưa rõ.",
+    "Cảnh báo sự cố; lưu lịch sử và xuất báo cáo.",
+    "Kiểm tra sức chứa và giữ vị trí trước khi nhận hàng."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Giao diện giám sát cửa và chỉ số toàn kho",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\CHECK-WINDOWS-2026-10-13\\doors-live.png"
+    }
+   ],
+   "notes": "Giao diện tập trung thông tin; quyết định an toàn của cửa D07/D08 vẫn do firmware thực hiện."
+  },
+  {
+   "kind": "slide",
+   "id": "05",
+   "title": "Phạm vi mô hình: 4 khu, 12 cửa",
+   "layout": "table-top",
+   "chapter": {
+    "number": 1,
+    "title": "Khảo sát, phân tích và thiết kế hệ thống kho hàng thông minh"
+   },
+   "items": [],
+   "ordered": false,
+   "table": [
+    [
+     "Khu vực",
+     "Điều kiện nhiệt độ demo",
+     "Cửa",
+     "Nguồn dữ liệu"
+    ],
+    [
+     "A — Kho thường",
+     "18 đến 30 °C",
+     "D01–D03",
+     "SIM-A01"
+    ],
+    [
+     "B — Kho mát",
+     "2 đến 8 °C",
+     "D04–D06",
+     "SIM-B01"
+    ],
+    [
+     "C — Kho lạnh",
+     "−22 đến −16 °C",
+     "D07–D09",
+     "ESP-C01 và SIM-C02"
+    ],
+    [
+     "D — Khu đệm",
+     "18 đến 28 °C",
+     "D10–D12",
+     "SIM-D01"
+    ]
+   ],
+   "images": [
+    {
+     "alt": "Phạm vi thiết bị và cửa theo từng khu",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\02-so-do-bon-khu.svg"
+    }
+   ],
+   "notes": "Có 5 danh tính thiết bị: một ESP32 chạy Wokwi và bốn thiết bị script Node. Các dải nhiệt độ là cấu hình của mô hình, không phải yêu cầu chung cho mọi loại hàng."
+  },
+  {
+   "kind": "slide",
+   "id": "06",
+   "title": "Thiết kế theo kiến trúc IoT 4 tầng",
+   "layout": "img-quad",
+   "chapter": {
+    "number": 1,
+    "title": "Khảo sát, phân tích và thiết kế hệ thống kho hàng thông minh"
+   },
+   "items": [
+    "**Thu thập và chấp hành:** cảm biến, RFID, trạng thái cửa và đầu ra cảnh báo.",
+    "**Mạng:** gateway và truyền bản tin MQTT/TLS.",
+    "**Máy chủ:** broker, backend xử lý nghiệp vụ và MySQL.",
+    "**Ứng dụng:** dashboard giám sát, điều khiển, lịch sử và báo cáo."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Bốn tầng chức năng của hệ thống",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\01-kien-truc-bon-tang.svg"
+    }
+   ],
+   "notes": "Tài liệu đề xuất thêm mạng công nghiệp, VLAN và phần cứng chuyên dụng. Bản demo dùng gateway Wokwi và dịch vụ cục bộ để kiểm chứng luồng xử lý."
+  },
+  {
+   "kind": "section",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   }
+  },
+  {
+   "kind": "slide",
+   "id": "07",
+   "title": "Các tín hiệu cần theo dõi tại kho lạnh",
+   "layout": "table-top",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [],
+   "ordered": false,
+   "table": [
+    [
+     "Tín hiệu",
+     "Vai trò",
+     "Cách mô phỏng"
+    ],
+    [
+     "RFID IN/OUT",
+     "Theo dõi người ra/vào",
+     "Dòng lệnh Serial"
+    ],
+    [
+     "Presence/mmWave",
+     "Đối chiếu người còn trong kho",
+     "Công tắc"
+    ],
+    [
+     "Contact",
+     "Xác định trạng thái cửa",
+     "Công tắc"
+    ],
+    [
+     "Rèm quang",
+     "Phát hiện vật cản tại cửa",
+     "Công tắc"
+    ],
+    [
+     "Panic",
+     "Yêu cầu xử lý khẩn cấp",
+     "Nút nhấn"
+    ],
+    [
+     "Nhiệt độ/độ ẩm",
+     "Theo dõi môi trường",
+     "DHT22 trên Wokwi"
+    ]
+   ],
+   "images": [
+    {
+     "alt": "Đầu vào và đầu ra của mô hình ESP32",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\05-dau-vao-dau-ra.svg"
+    }
+   ],
+   "notes": "Mô hình kiểm tra phản ứng với tín hiệu hiện diện, không đánh giá khả năng phát hiện người của radar thực tế. Camera nhiệt và CO₂ mới thuộc đề xuất mở rộng."
+  },
+  {
+   "kind": "slide",
+   "id": "08",
+   "title": "Chỉ đóng cửa khi mọi điều kiện đều an toàn",
+   "layout": "img-text",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [
+    "Số người đã xác minh và bằng 0.",
+    "Không phát hiện hiện diện; rèm quang không bị che chắn.",
+    "Đầu vào đã xác nhận, không có panic và thỏa điều kiện liên động.",
+    "Firmware tự kiểm tra lệnh; tín hiệu chưa rõ phải chặn đóng."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Các điều kiện đồng thời để cho phép đóng cửa",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\03-dieu-kien-dong-cua.svg"
+    }
+   ],
+   "notes": "Công thức nền tảng là `Cho phép đóng = Count xác minh bằng 0 AND Presence clear AND Beam clear`. Firmware bổ sung kiểm tra sức khỏe đầu vào, panic, liên động và tính hợp lệ của lệnh."
+  },
+  {
+   "kind": "slide",
+   "id": "09",
+   "title": "RFID và hiện diện kiểm tra chéo số người",
+   "layout": "text-img",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [
+    "Thẻ hợp lệ quét vào/ra làm thay đổi số người trong kho.",
+    "Đọc lặp không tăng số người; thẻ bị thu hồi hoặc không hợp lệ bị từ chối.",
+    "Count bằng 0 nhưng presence vẫn có người: tiếp tục chặn đóng.",
+    "Sau reboot, count chưa xác minh được hiển thị là chưa rõ."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Nhật ký RFID và kiểm tra người trong khu lạnh",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M08-2026-10-13\\m08-2-zone-c.png"
+    }
+   ],
+   "notes": "Phân biệt “không có người” và “chưa biết số người”. Không dùng giá trị 0 để thay thế dữ liệu chưa xác minh."
+  },
+  {
+   "kind": "slide",
+   "id": "10",
+   "title": "Liên động hai cửa và cảnh báo mở lâu",
+   "layout": "img-text",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [
+    "D07/D08 mô phỏng hai cửa của khu lạnh; chế độ bình thường có kiểm tra liên động.",
+    "Rèm quang bị chắn trong lúc đóng: firmware yêu cầu đảo chiều mở.",
+    "Cửa mở từ 30 giây: cảnh báo tại chỗ.",
+    "Cửa mở quá 60 giây: nâng mức cảnh báo.",
+    "Panic ưu tiên thoát hiểm, có thể vượt điều kiện liên động bình thường."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Hai cửa D07 và D08 trên giao diện điều khiển",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\CHECK-WINDOWS-2026-10-13\\doors-live.png"
+    }
+   ],
+   "notes": "Mục tiêu liên động là hạn chế mở đồng thời khi vận hành bình thường. Khẩn cấp phải ưu tiên cứu người; không trình bày liên động như một điều kiện cản thoát hiểm."
+  },
+  {
+   "kind": "slide",
+   "id": "11",
+   "title": "Xử lý khẩn cấp tại thiết bị",
+   "layout": "img-text",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [
+    "Panic: nhả khóa, yêu cầu mở cửa, bật đầu ra cảnh báo.",
+    "Trạng thái khẩn cấp được chốt; nhả nút không tự xóa panic.",
+    "Presence kéo dài khi hai cửa đóng quá 5 phút: cảnh báo nguy cơ mắc kẹt.",
+    "Phản ứng cục bộ vẫn chạy khi broker mất kết nối."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Chuỗi phản ứng khi nhấn nút khẩn cấp",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\04-phan-ung-panic.svg"
+    }
+   ],
+   "notes": "Đèn, còi, sưởi và quạt được biểu diễn bằng LED. Chốt xả cơ học và relay an toàn độc lập là yêu cầu khi triển khai thực tế, chưa được lắp trong mô hình."
+  },
+  {
+   "kind": "slide",
+   "id": "12",
+   "title": "Kiểm soát sức chứa trước khi nhận hàng",
+   "layout": "text-img",
+   "chapter": {
+    "number": 2,
+    "title": "Thiết kế an toàn và vận hành phân hệ kho lạnh"
+   },
+   "items": [
+    "Chọn vị trí phù hợp nhiệt độ, kích thước và tải trọng.",
+    "Tính sức chứa bằng vị trí đang chứa cộng vị trí đang giữ.",
+    "Từ 85%: cảnh báo; giữ thêm làm vượt 95%: từ chối.",
+    "Khu đệm đạt từ 95%: dừng nhận hàng dù kho còn chỗ.",
+    "Giữ vị trí trong 15 phút, ngăn hai yêu cầu giữ cùng một ô."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Chức năng nhận hàng và giữ vị trí",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M13-2026-10-13\\m14-1-reserved.png"
+    }
+   ],
+   "notes": "Ngưỡng xét trên tỷ lệ thực bằng số nguyên, không lấy số phần trăm đã làm tròn trên UI. Dữ liệu vị trí/hàng đang chứa là seed demo, chưa đồng bộ WMS."
+  },
+  {
+   "kind": "section",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   }
+  },
+  {
+   "kind": "slide",
+   "id": "13",
+   "title": "Công cụ và công nghệ sử dụng",
+   "layout": "table-img",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [],
+   "ordered": false,
+   "table": [
+    [
+     "Thành phần",
+     "Công cụ/công nghệ",
+     "Vai trò"
+    ],
+    [
+     "Firmware",
+     "ESP32, C++, PlatformIO",
+     "Đọc tín hiệu và xử lý quy tắc cục bộ"
+    ],
+    [
+     "Mô phỏng",
+     "Wokwi, script Node",
+     "Thực thi ESP32 và tạo dữ liệu các khu"
+    ],
+    [
+     "Truyền thông",
+     "Mosquitto, MQTT/TLS",
+     "Trao đổi telemetry, sự kiện và lệnh"
+    ],
+    [
+     "Máy chủ",
+     "Node.js",
+     "API, lưu dữ liệu và WebSocket"
+    ],
+    [
+     "Cơ sở dữ liệu",
+     "MySQL",
+     "Dữ liệu vận hành và nghiệp vụ"
+    ],
+    [
+     "Giao diện",
+     "React, Vite",
+     "Dashboard tiếng Việt, nền trắng"
+    ]
+   ],
+   "images": [
+    {
+     "alt": "Các thành phần được triển khai trong KhoGuard",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\architecture\\kien-truc-tong-the.png"
+    }
+   ],
+   "notes": "PlatformIO dùng để build; Wokwi dùng để chạy mô phỏng. MySQL được giữ làm cơ sở dữ liệu thống nhất cho các quan hệ kho, cửa, người dùng và giữ chỗ."
+  },
+  {
+   "kind": "slide",
+   "id": "14",
+   "title": "Luồng dữ liệu và điều khiển",
+   "layout": "text-img",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [
+    "ESP32/script → MQTT/TLS → Mosquitto.",
+    "Backend kiểm tra hợp đồng dữ liệu và lưu vào MySQL.",
+    "REST lấy dữ liệu ban đầu; WebSocket cập nhật giao diện.",
+    "Lệnh cửa đi từ dashboard tới ESP32; thiết bị trả ACK áp dụng hoặc từ chối.",
+    "Giao diện cập nhật trạng thái cửa theo dữ liệu thiết bị."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Luồng một yêu cầu điều khiển cửa và ACK",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\architecture\\luong-lenh-cua.png"
+    }
+   ],
+   "notes": "API nhận yêu cầu không có nghĩa cửa đã chuyển trạng thái. ACK của ESP32 và telemetry là bằng chứng kết quả thực thi trong mô phỏng."
+  },
+  {
+   "kind": "slide",
+   "id": "15",
+   "title": "MySQL lưu lịch sử và bảo vệ nghiệp vụ",
+   "layout": "img-text",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [
+    "Lưu cấu trúc kho, thiết bị, trạng thái hiện tại và lịch sử telemetry.",
+    "Ghi sự kiện RFID, cảnh báo và kết quả từng lệnh cửa.",
+    "Lưu tài khoản, phiên đăng nhập, ca ra/vào và giữ chỗ.",
+    "Transaction và ràng buộc duy nhất ngăn lưu trùng, giữ trùng vị trí.",
+    "Dữ liệu còn sau khi tải lại trang hoặc khởi động lại backend."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Các nhóm bảng dữ liệu chính của KhoGuard",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\06-du-lieu-mysql.svg"
+    }
+   ],
+   "notes": "MySQL phù hợp vì dữ liệu có quan hệ rõ và thao tác nhận hàng cần tính nhất quán. Không cần thêm một cơ sở dữ liệu thứ hai cho phạm vi demo này."
+  },
+  {
+   "kind": "slide",
+   "id": "16",
+   "title": "Dashboard giám sát toàn kho",
+   "layout": "text-img",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [
+    "Các trang: Tổng quan, Sơ đồ kho, Giám sát cửa, Môi trường, Nhận hàng, Nhật ký.",
+    "Hiển thị vị trí, trạng thái cửa và các chỉ số theo khu vực.",
+    "Ghi rõ nguồn Wokwi/script và dữ liệu mới, cũ hoặc chưa rõ.",
+    "Điều khiển D07/D08 hiển thị trạng thái chờ, áp dụng, từ chối hoặc hết hạn.",
+    "Giao diện tiếng Việt, nền trắng, hỗ trợ màn hình nhỏ."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Dashboard KhoGuard nền trắng",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\CHECK-WINDOWS-2026-10-13\\doors-live.png"
+    }
+   ],
+   "notes": "Giải thích vì sao dữ liệu cũ vẫn có thể được xem để tra cứu nhưng không được coi là căn cứ an toàn để gửi lệnh đóng."
+  },
+  {
+   "kind": "slide",
+   "id": "17",
+   "title": "Phân quyền, lịch ca và bảo mật kết nối",
+   "layout": "img-text",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [
+    "Viewer chỉ xem; operator vận hành; admin thêm quyền xem nhật ký đăng nhập.",
+    "RFID được đối chiếu lịch ca và lưu nhật ký ra/vào; lối ra không bị chặn theo ca.",
+    "Mỗi thiết bị có tài khoản MQTT và ACL giới hạn topic.",
+    "MQTT/TLS xác minh CA và hostname; bí mật nằm ngoài mã nguồn.",
+    "Bản demo chạy cục bộ; chưa cấu hình triển khai web ra Internet."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Đối chiếu RFID với lịch ca và nhật ký ra vào",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M13-2026-10-13\\m13-3-access-audit.png"
+    }
+   ],
+   "notes": "Lịch ca trong mô hình là dữ liệu demo tại MySQL. Chưa kéo lịch từ WMS; trạng thái ngoài ca được ghi nhận, không biến phần mềm thành cơ chế ngăn thoát hiểm."
+  },
+  {
+   "kind": "slide",
+   "id": "18",
+   "title": "Nhật ký và báo cáo phục vụ truy vết",
+   "layout": "text-img",
+   "chapter": {
+    "number": 3,
+    "title": "Triển khai mô hình KhoGuard"
+   },
+   "items": [
+    "Tra cứu sự kiện thiết bị, cảnh báo, lệnh cửa và giữ chỗ.",
+    "Lọc theo thời gian, khu vực và loại dữ liệu.",
+    "Phân biệt cảnh báo đã tiếp nhận với cảnh báo đã hết điều kiện.",
+    "Xuất CSV UTF-8, bảo vệ ô dữ liệu trước nội dung công thức."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Bộ lọc lịch sử và chức năng xuất CSV",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M15-2026-10-13\\m15-1-history-filter.png"
+    }
+   ],
+   "notes": "Tiếp nhận cảnh báo chỉ ghi nhận người vận hành đã biết sự cố; nó không làm điều kiện nguy hiểm tự biến mất."
+  },
+  {
+   "kind": "section",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   }
+  },
+  {
+   "kind": "slide",
+   "id": "19",
+   "title": "Demo 1–2: Ra/vào hợp lệ và kiểm tra chéo hiện diện",
+   "layout": "table-img",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [],
+   "ordered": false,
+   "table": [
+    [
+     "Tình huống",
+     "Thao tác demo",
+     "Kết quả cần thấy"
+    ],
+    [
+     "Người vào",
+     "Quét `DEMO-017 IN`",
+     "Count tăng 1; đóng bị từ chối"
+    ],
+    [
+     "Người ra",
+     "Quét OUT, presence/beam clear",
+     "Count 0 xác minh; được phép đóng"
+    ],
+    [
+     "Count 0 nhưng còn presence",
+     "Bật công tắc presence",
+     "Đóng bị từ chối; ghi nhận sai lệch"
+    ]
+   ],
+   "images": [
+    {
+     "alt": "Giao diện hiển thị kết quả từ chối lệnh",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M10-2026-10-13\\m10-3-command-rejected.png"
+    }
+   ],
+   "notes": "Kiểm tra trường hợp có người theo RFID và trường hợp RFID/presence không khớp. Không dùng thao tác tiếp nhận cảnh báo để bỏ qua kiểm tra an toàn."
+  },
+  {
+   "kind": "slide",
+   "id": "20",
+   "title": "Demo 3–4: Panic và từ chối nhận hàng",
+   "layout": "two-img",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [
+    "**Panic:** nhấn nút → nhả khóa, yêu cầu mở cửa, bật cảnh báo.",
+    "**Mất broker:** panic vẫn phản ứng tại ESP32; sự kiện gửi lại khi nối mạng.",
+    "**Nhận hàng:** yêu cầu giữ chỗ làm vượt ngưỡng sức chứa bị từ chối.",
+    "Không còn vị trí phù hợp nhiệt độ/kích thước/tải trọng cũng phải từ chối."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Phản ứng panic khi mất kết nối trung tâm",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\04-phan-ung-panic.svg"
+    },
+    {
+     "alt": "Ví dụ từ chối vì không có vị trí phù hợp",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\evidence\\M13-2026-10-13\\m14-2-no-slot.png"
+    }
+   ],
+   "notes": "Ảnh từ chối vị trí minh họa lỗi không có ô phù hợp, không phải ảnh kho đầy 95%. Bốn kịch bản tự động dùng FakeEdge; các ca panic/mất broker có bằng chứng Wokwi riêng."
+  },
+  {
+   "kind": "slide",
+   "id": "21",
+   "title": "Tín hiệu chưa rõ và dữ liệu cũ phải chặn đóng",
+   "layout": "img-text",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [
+    "Beam, presence hoặc contact chưa xác nhận: firmware từ chối đóng.",
+    "Mất dòng RFID làm count chưa xác minh: tiếp tục từ chối đóng.",
+    "Telemetry quá cửa sổ 10 giây: backend trả `409 DEVICE_NOT_LIVE`.",
+    "Ca stale không phát lệnh MQTT; thiết bị khác vẫn nhận dữ liệu bình thường."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Tín hiệu chưa rõ không được coi là điều kiện an toàn",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\03-dieu-kien-dong-cua.svg"
+    }
+   ],
+   "notes": "Các lỗi đầu vào được tạo bằng bản firmware kiểm thử riêng trên Wokwi; `controller.h` giữ nguyên. Ca tín hiệu trả ACK `INPUT_UNKNOWN`; ca stale bị chặn từ API."
+  },
+  {
+   "kind": "slide",
+   "id": "22",
+   "title": "Nghiệm thu reboot và chứng chỉ sai",
+   "layout": "text-img",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [
+    "Reboot thật bằng `ESP.restart()`: boot ID đổi, count trở về chưa xác minh.",
+    "Presence còn người sau reboot: lệnh đóng nhận `INPUT_UNKNOWN`.",
+    "CA sai và hostname sai: chính ESP32 từ chối xác minh TLS.",
+    "Boot bị từ chối không phát telemetry; nạp cấu hình đúng kết nối lại được."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Kết quả nghiệm thu reboot và xác minh TLS trên ESP32",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\08-reboot-va-tls.svg"
+    }
+   ],
+   "notes": "Chứng minh bằng ESP32 chạy Wokwi, không chỉ bằng client Node. Sau kiểm thử đã phục hồi firmware bình thường và xác nhận 5/5 thiết bị online/fresh."
+  },
+  {
+   "kind": "slide",
+   "id": "23",
+   "title": "Kết quả kiểm thử chức năng và tải",
+   "layout": "table-top",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [],
+   "ordered": false,
+   "table": [
+    [
+     "Nội dung kiểm tra",
+     "Kết quả ghi nhận"
+    ],
+    [
+     "Unit JavaScript sau sửa lỗi",
+     "109/109 đạt, 0 bỏ qua"
+    ],
+    [
+     "Wokwi bổ sung unknown/stale, reboot, TLS và phục hồi",
+     "9/9 nhóm đạt"
+    ],
+    [
+     "Hai bộ test C++ chạy riêng qua WSL",
+     "Đạt"
+    ],
+    [
+     "Tải 50 nguồn ảo, 5 danh tính thiết bị",
+     "Lưu 2.000/2.000 bản tin"
+    ],
+    [
+     "Publish → WebSocket",
+     "P95 211 ms; chưa đo DOM"
+    ]
+   ],
+   "images": [
+    {
+     "alt": "Các chỉ số kiểm thử có bằng chứng",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\07-ket-qua-kiem-thu.svg"
+    }
+   ],
+   "notes": "Các con số thuộc những lượt kiểm thử có báo cáo riêng. 50 nguồn ảo không phải 50 tài khoản thiết bị độc lập; 211 ms là tới WebSocket, chưa chứng minh độ trễ hiển thị trên màn hình."
+  },
+  {
+   "kind": "slide",
+   "id": "24",
+   "title": "Lỗi phát hiện trong kiểm thử và cách khắc phục",
+   "layout": "img-text",
+   "chapter": {
+    "number": 4,
+    "title": "Demo và kết quả kiểm thử"
+   },
+   "items": [
+    "Từ chối lệnh tới thiết bị stale từng làm backend xóa xác nhận phiên của mọi thiết bị.",
+    "Đã tách lỗi nghiệp vụ khỏi xử lý lỗi transaction MySQL.",
+    "Test hồi quy chứng minh: từ chối lệnh không làm thiết bị khác mất freshness.",
+    "Khóa dòng MySQL 9,5 giây: readiness báo lỗi, không ghi nhận dữ liệu chưa lưu là mới.",
+    "Nhả khóa: 3 frame tồn đọng lưu đúng một lần sau 418 ms, rồi phục hồi dữ liệu mới."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Cơ sở dữ liệu và các nhóm dữ liệu cần bảo toàn",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\06-du-lieu-mysql.svg"
+    }
+   ],
+   "notes": "Số đo 418 ms thuộc lượt kiểm tra sau sửa lỗi gần nhất; không phải cam kết phục hồi cho mọi sự cố DB. Lỗi DB thật vẫn làm mất xác nhận phiên để tránh coi dữ liệu cũ là an toàn."
+  },
+  {
+   "kind": "section",
+   "chapter": {
+    "number": 5,
+    "title": "Kết luận và hướng phát triển"
+   }
+  },
+  {
+   "kind": "slide",
+   "id": "25",
+   "title": "Những kết quả đã đạt",
+   "layout": "text-img",
+   "chapter": {
+    "number": 5,
+    "title": "Kết luận và hướng phát triển"
+   },
+   "items": [
+    "Dựng được luồng IoT từ ESP32/Wokwi qua MQTT, backend và MySQL tới React.",
+    "Giám sát 4 khu, 12 cửa và phân biệt nguồn dữ liệu.",
+    "Kiểm chứng chặn đóng, liên động, panic, timer và phản ứng khi mất mạng.",
+    "Có phân quyền, nhận hàng/giữ chỗ, nhật ký và xuất CSV.",
+    "Lưu bằng chứng kiểm thử và phục hồi firmware bình thường sau nghiệm thu."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Hệ thống KhoGuard đã tích hợp",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\architecture\\kien-truc-tong-the.png"
+    }
+   ],
+   "notes": "Giá trị của đồ án là mô hình tích hợp và các tình huống kiểm chứng rõ ràng. Chưa có phép đo thực địa để kết luận mức tiết kiệm nhiệt, chi phí hoặc hiệu quả vận hành thực tế."
+  },
+  {
+   "kind": "slide",
+   "id": "26",
+   "title": "Giới hạn của mô hình hiện tại",
+   "layout": "img-text",
+   "chapter": {
+    "number": 5,
+    "title": "Kết luận và hướng phát triển"
+   },
+   "items": [
+    "Cảm biến, cửa và đầu ra được mô phỏng; chưa nghiệm thu phần cứng.",
+    "Chưa có camera nhiệt, AI, CO₂, relay an toàn hay chốt thoát hiểm thật.",
+    "Chưa kết nối WMS, truy vết pallet bằng RFID hoặc quy trình xuất kho.",
+    "M16 còn phép đo publish → hiển thị DOM.",
+    "M17 còn người nhận chạy lại cấu hình và demo trên máy khác."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Phạm vi mô phỏng và đầu vào đầu ra",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\05-dau-vao-dau-ra.svg"
+    }
+   ],
+   "notes": "Không khẳng định mô hình đạt chứng nhận an toàn hoặc đã thử được khả năng phát hiện người bất tỉnh. Mạng công nghiệp/VLAN trong tài liệu là phương án thiết kế, chưa triển khai ở demo localhost."
+  },
+  {
+   "kind": "slide",
+   "id": "27",
+   "title": "Hướng phát triển tiếp theo",
+   "layout": "text-img",
+   "chapter": {
+    "number": 5,
+    "title": "Kết luận và hướng phát triển"
+   },
+   "items": [
+    "Đo độ trễ tới DOM và hoàn tất quy trình bàn giao có người chạy lại.",
+    "Thử phần cứng thật: cảm biến, motor, khóa và cơ cấu thoát hiểm.",
+    "Tích hợp WMS, lịch ca, xuất kho và RFID cho hàng hóa.",
+    "Triển khai mạng/HTTPS và bảo vệ truy cập khi mở rộng ngoài localhost.",
+    "Đánh giá cảm biến bổ sung và hiệu quả vận hành bằng dữ liệu thực tế."
+   ],
+   "ordered": true,
+   "table": [],
+   "images": [
+    {
+     "alt": "Các tầng có thể phát triển tiếp từ mô hình",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\01-kien-truc-bon-tang.svg"
+    }
+   ],
+   "notes": "Ưu tiên đóng các phép đo/bàn giao còn thiếu, sau đó mới mở rộng phần cứng và tích hợp. Thêm cảm biến cần kiểm chứng khả năng phát hiện trong môi trường kho lạnh thực tế."
+  },
+  {
+   "kind": "slide",
+   "id": "28",
+   "title": "Cảm ơn và trao đổi",
+   "layout": "end",
+   "chapter": {
+    "number": 5,
+    "title": "Kết luận và hướng phát triển"
+   },
+   "items": [
+    "Cảm ơn thầy/cô và các bạn đã theo dõi.",
+    "Nhóm 17 — KhoGuard, Đề tài 42.",
+    "Sẵn sàng demo: ra/vào RFID, chặn đóng, panic và giữ chỗ nhận hàng.",
+    "Trao đổi về kiến trúc, quy tắc an toàn và kết quả kiểm thử."
+   ],
+   "ordered": false,
+   "table": [],
+   "images": [
+    {
+     "alt": "Mô hình KhoGuard dùng cho phần trao đổi",
+     "path": "D:\\huit\\iot\\source\\khoguard-iot\\docs\\slides\\assets\\02-so-do-bon-khu.svg"
+    }
+   ],
+   "notes": "Giữ dashboard và tab Simulator sẵn sàng nếu cần minh họa thêm. Không chạy lại các ca thay firmware/TLS ngay trong buổi trình bày nếu chưa chuẩn bị thời gian phục hồi."
+  }
+ ]
+}

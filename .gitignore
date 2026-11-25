@@ -3,12 +3,6 @@ data/exports/
 models/
 experiments/
 reports/
-docs/*
-!docs/KICH_BAN_THUYET_TRINH.md
-!docs/KICH_BAN_THUYET_TRINH.docx
-!docs/KICH_BAN_THUYET_TRINH.pdf
-!docs/build_kich_ban_docx.py
-docs/slides/*
 /social-topic-trends/data/exports/
 research_notes/
 .impeccable/
@@ -48,3 +42,6 @@ derby.log
 !/social-topic-trends/reports/
 !/social-topic-trends/reports/youtube_news/
 !/social-topic-trends/reports/youtube_news/**
+
+# Office lock files
+~$*

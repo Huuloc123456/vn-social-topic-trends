@@ -1,0 +1,690 @@
+{
+  "strings": {
+    "course": "NHẬP MÔN BIG DATA",
+    "product": "XU HƯỚNG TIN TỨC",
+    "tagline": "Phân tích xu hướng chủ đề trên mạng xã hội",
+    "advisor": "GVHD: ThS. Ngô Dương Hà",
+    "members": "Bùi Hữu Lộc (2001230467) · Đỗ Lê Thanh Mẫn (2001230510)",
+    "thanks": "CẢM ƠN THẦY CÔ VÀ CÁC BẠN ĐÃ LẮNG NGHE!",
+    "team": "Đề tài 5 — Phân tích xu hướng chủ đề trên mạng xã hội"
+  },
+  "slides": [
+    {
+      "kind": "slide",
+      "layout": "cover",
+      "title": "",
+      "notes": "Giới thiệu nhóm, giảng viên hướng dẫn và tên đề tài."
+    },
+    {
+      "kind": "slide",
+      "layout": "agenda",
+      "title": "",
+      "notes": "Bài trình bày gồm bốn phần theo đúng cấu trúc báo cáo.",
+      "items": [
+        "Giới thiệu đề tài",
+        "Cơ sở lý thuyết",
+        "Xây dựng ứng dụng, trực quan hóa dữ liệu",
+        "Kết luận và định hướng phát triển"
+      ]
+    },
+    {
+      "kind": "section",
+      "number": 1,
+      "title": "Giới thiệu đề tài"
+    },
+    {
+      "kind": "slide",
+      "layout": "img-top",
+      "title": "Bài toán: hôm nay báo chí đang đưa tin về gì?",
+      "notes": "Ảnh minh họa tóm tắt snapshot cập nhật 03/11/2026, không phải ảnh chụp giao diện dashboard trực tiếp.",
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\overview_updated_2026-11-03.png",
+          "alt": "Tóm tắt dữ liệu và trạng thái snapshot mới"
+        }
+      ],
+      "cards": [
+        [
+          "Vấn đề",
+          [
+            "Báo, đài Việt Nam đăng **hàng trăm video mỗi ngày** trên YouTube.",
+            "Cần biết theo ngày/tháng: chủ đề nào **nhiều video nhất**, chủ đề nào **tăng nhanh**, bao nhiêu kênh cùng đưa tin."
+          ]
+        ],
+        [
+          "Hướng giải quyết",
+          [
+            "Đề tài 5: thu thập, lưu HDFS/NoSQL, xử lý Spark, mô hình chủ đề, dashboard theo thời gian.",
+            "Dữ liệu: **tiêu đề video YouTube** của các kênh báo, đài, có thời gian đăng và liên kết gốc."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "stats",
+      "title": "Mục tiêu và phạm vi",
+      "notes": "Cập nhật 03/11/2026. Dữ liệu trong CSV còn thiếu metadata và lượt crawl chưa hoàn tất.",
+      "stats": [
+        [
+          "1.070.550",
+          "video trong CSV snapshot"
+        ],
+        [
+          "142",
+          "channel_id khác nhau"
+        ],
+        [
+          "1.034",
+          "ngày lịch đến 30/10/2026*"
+        ],
+        [
+          "980.384",
+          "tiêu đề qua lọc mô hình"
+        ]
+      ],
+      "cards": [
+        [
+          "Mục tiêu",
+          [
+            "Pipeline chạy lại được: API → CSV → HDFS → Spark → MongoDB → dashboard.",
+            "So sánh Word2Vec + KMeans với LDA, chọn mô hình chính.",
+            "Thống kê chủ đề theo ngày/tháng, phát hiện khoảng tăng đột biến."
+          ]
+        ],
+        [
+          "Phạm vi",
+          [
+            "Chỉ dùng tiêu đề video; không dùng bình luận, mô tả hay nội dung video.",
+            "Phân tích theo lô trên Docker, HDFS, Spark và MongoDB.",
+            "Lượt thu thập bị gián đoạn; chủ đề là mô hình tự động và không đại diện dư luận toàn xã hội."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "section",
+      "number": 2,
+      "title": "Cơ sở lý thuyết"
+    },
+    {
+      "kind": "slide",
+      "layout": "table-top",
+      "title": "Dữ liệu lớn và đặc trưng 5V trong đề tài",
+      "notes": "Phân biệt quy mô thu thập với mức độ quan tâm xã hội: số video còn phụ thuộc số kênh và độ phủ crawl.",
+      "table": [
+        [
+          "Đặc trưng",
+          "Thể hiện trong đề tài"
+        ],
+        [
+          "Volume",
+          "1.070.550 bản ghi tiêu đề trong CSV snapshot"
+        ],
+        [
+          "Velocity",
+          "Khoảng 1.035 video/ngày trong 1.034 ngày lịch; ngày cuối là một phần"
+        ],
+        [
+          "Variety",
+          "Tiêu đề, thời gian, mã kênh, URL, lượt xem và lượt thích"
+        ],
+        [
+          "Veracity",
+          "438.857 ID còn chờ metadata; 430.857 dòng trống lượt xem; 463.995 trống lượt thích"
+        ],
+        [
+          "Value",
+          "Nhóm tiêu đề theo chủ đề và theo dõi biến động theo thời gian"
+        ]
+      ],
+      "items": [
+        "* Khoảng thời gian nguồn: 01/01/2024 đến trước 30/10/2026 theo UTC; ngày cuối tại Việt Nam chưa đủ 24 giờ.",
+        "CSV khoảng 276,8 MiB; mẫu theo danh sách kênh, không đại diện người dùng YouTube Việt Nam."
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "quad",
+      "title": "Công nghệ lưu trữ và xử lý phân tán",
+      "notes": "Giải thích vai trò từng công nghệ trong kiến trúc, không đi sâu vào cài đặt.",
+      "cards": [
+        [
+          "HDFS",
+          [
+            "NameNode quản lý metadata, DataNode lưu block 128 MB.",
+            "Cụm đồ án: 1 NameNode, 2 DataNode, hệ số sao chép 2."
+          ]
+        ],
+        [
+          "Apache Spark",
+          [
+            "Driver điều phối, executor chạy song song; DataFrame + Catalyst, thực thi lười.",
+            "MLlib Pipeline dùng chung tiền xử lý lúc huấn luyện và suy luận."
+          ]
+        ],
+        [
+          "MongoDB",
+          [
+            "CSDL NoSQL hướng tài liệu (BSON), không cần schema cố định.",
+            "Lưu bảng kết quả nhỏ để dashboard đọc nhanh."
+          ]
+        ],
+        [
+          "Docker · Streamlit · Plotly",
+          [
+            "Docker Compose dựng toàn cụm bằng một lệnh.",
+            "Streamlit + Plotly cho dashboard tương tác."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "compare",
+      "title": "Biểu diễn văn bản và mô hình chủ đề",
+      "notes": "So sánh gán cứng (KMeans) với phân bố mềm (LDA) và lý do cần cả hai.",
+      "cards": [
+        [
+          "Word2Vec + KMeans (mô hình chính)",
+          [
+            "Tiền xử lý: chữ thường, bỏ URL, chữ số, ký hiệu; tách token; bỏ từ dừng; lọc tiếng Việt bằng fastText.",
+            "Word2Vec 100 chiều → vector trung bình của tiêu đề → chuẩn hóa L2.",
+            "KMeans k = 10: mỗi tiêu đề thuộc **đúng một cụm** → đếm video theo ngày.",
+            "Nhãn cụm bằng **c-TF-IDF**: 3 từ đặc trưng nhất của cụm."
+          ]
+        ],
+        [
+          "LDA (mô hình bổ sung)",
+          [
+            "CountVectorizer tạo vector tần suất từ.",
+            "Mỗi tài liệu là **hỗn hợp nhiều chủ đề**, mỗi chủ đề là phân phối trên từ vựng.",
+            "10 chủ đề, 30 vòng lặp, bộ tối ưu online.",
+            "Dùng trong trang Phân tích văn bản để xem phân bố mềm."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "compare",
+      "title": "Chỉ số đánh giá và phát hiện tăng đột biến",
+      "notes": "Nhấn mạnh: không có nhãn chuẩn nên không có độ chính xác; quy tắc tăng đột biến chỉ mang tính mô tả.",
+      "cards": [
+        [
+          "Đánh giá mô hình",
+          [
+            "**NPMI**: độ đồng xuất hiện chuẩn hóa của từ khóa, trong khoảng [-1, 1]; so sánh được cả hai mô hình.",
+            "**Silhouette** (cosine): mức tách biệt giữa các cụm KMeans.",
+            "**Log-perplexity**: khả năng dự đoán dữ liệu giữ lại của LDA (càng thấp càng tốt)."
+          ]
+        ],
+        [
+          "Xu hướng theo thời gian",
+          [
+            "Tỷ trọng p(k, d) = số video cụm k / tổng video ngày d.",
+            "z = (p − μ) / max(σ, ε), so với trung bình 7 ngày trước.",
+            "Tăng đột biến khi **z > 2,5**, có ít nhất **20 video** và tỷ trọng ≥ **1,2 lần** mức nền."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "section",
+      "number": 3,
+      "title": "Xây dựng ứng dụng, trực quan hóa dữ liệu"
+    },
+    {
+      "kind": "slide",
+      "layout": "img-top",
+      "title": "Kiến trúc tổng thể hệ thống",
+      "notes": "Đi theo mũi tên trên sơ đồ, mỗi tầng có đầu vào và đầu ra kiểm tra được.",
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\architecture.png",
+          "alt": "Sơ đồ kiến trúc: API, thu thập, CSV, HDFS, Spark, MongoDB, dashboard"
+        }
+      ],
+      "cards": [
+        [
+          "Luồng dữ liệu",
+          [
+            "YouTube API → CSV → HDFS → Spark ETL/EDA → MLlib → tổng hợp xu hướng → MongoDB → dashboard."
+          ]
+        ],
+        [
+          "Môi trường",
+          [
+            "Hadoop 3.4.1 · Spark 3.5.3 (2 worker, 4 nhân, 4 GB mỗi worker) · MongoDB 7.0 · Streamlit 1.39."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "table-top-img",
+      "title": "Thu thập dữ liệu bằng YouTube Data API v3",
+      "notes": "Infographic đường dẫn, kích thước và số dòng của CSV mới; không phải ảnh chụp HDFS trực tiếp.",
+      "table": [
+        [
+          "Bước",
+          "Cách làm"
+        ],
+        [
+          "Danh mục nguồn",
+          "CSV hiện có 142 channel_id khác nhau"
+        ],
+        [
+          "Lấy mã video",
+          "Đọc playlist uploads theo từng kênh, có checkpoint phân trang"
+        ],
+        [
+          "Lấy metadata",
+          "videos.list theo nhóm ID; bản ghi chưa có metadata để trống chỉ số"
+        ],
+        [
+          "CSV hiện tại",
+          "1.070.550 dòng; giữ cùng tiêu đề nếu đến từ kênh khác nhau"
+        ],
+        [
+          "Trạng thái",
+          "Lượt quét bị gián đoạn; 438.857 ID còn thiếu metadata"
+        ]
+      ],
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\hdfs_updated_2026-11-03.png",
+          "alt": "Sơ đồ thông tin tệp CSV mới trên HDFS"
+        }
+      ],
+      "items": []
+    },
+    {
+      "kind": "slide",
+      "layout": "img-top",
+      "title": "Lưu trữ HDFS và cụm Spark",
+      "notes": "Infographic trạng thái của pipeline chạy ngày 02/11/2026; hai worker Spark đã hoạt động.",
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\pipeline_updated_2026-11-03.png",
+          "alt": "Trạng thái các bước pipeline Spark đã hoàn tất"
+        }
+      ],
+      "cards": [
+        [
+          "HDFS",
+          [
+            "CSV gốc: **/social/raw/youtube_news** (~276,8 MiB dữ liệu logic; replication 2).",
+            "Dữ liệu đã xử lý: **Parquet Snappy** tại /social/youtube_news."
+          ]
+        ],
+        [
+          "Spark Master",
+          [
+            "**2 worker ALIVE**, mỗi worker 4 nhân, 4 GB.",
+            "Pipeline ETL, EDA, E03, E04, tổng hợp xu hướng và ghi MongoDB đều đã **FINISHED**."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "table-text",
+      "title": "Làm sạch và tách tập dữ liệu bằng Spark",
+      "notes": "Số liệu từ reports/youtube_news/data_quality.json; giữ riêng tập thống kê và tập huấn luyện.",
+      "table": [
+        [
+          "Bước xử lý",
+          "Loại bỏ",
+          "Còn lại"
+        ],
+        [
+          "Kiểm tra schema / giá trị không hợp lệ",
+          "0",
+          "1.070.550"
+        ],
+        [
+          "Trùng video_id / ngoài cửa sổ",
+          "0",
+          "1.070.550"
+        ],
+        [
+          "Tập thống kê (volume)",
+          "–",
+          "1.070.550"
+        ],
+        [
+          "Không phải tiếng Việt / độ tin cậy thấp",
+          "88.540",
+          "982.010"
+        ],
+        [
+          "Dưới 3 token sau bỏ từ dừng",
+          "1.626",
+          "980.384"
+        ],
+        [
+          "Tập đủ điều kiện mô hình theo quality",
+          "–",
+          "980.384"
+        ]
+      ],
+      "items": [
+        "Thời gian nhóm theo **published_at_vn (UTC+7)**; cửa sổ lọc được cấu hình theo UTC.",
+        "Tập thống kê giữ mọi video hợp lệ; tập mô hình loại tiêu đề ngoài tiếng Việt/độ tin cậy thấp và tiêu đề quá ngắn.",
+        "Lưu ý: quality ghi 980.384 dòng mô hình; registry E03/E04 ghi 980.383 tài liệu, chênh 1 dòng cần đối soát."
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "stats",
+      "title": "Phân tích khám phá dữ liệu",
+      "notes": "Các số được tính từ snapshot hiện tại; khoảng thời gian gần nhất chưa hoàn chỉnh.",
+      "stats": [
+        [
+          "1.035",
+          "video/ngày (trung bình)"
+        ],
+        [
+          "129 – 2.023",
+          "video/ngày ít nhất – nhiều nhất"
+        ],
+        [
+          "78,6%",
+          "tiêu đề mô hình dài 11–20 token"
+        ],
+        [
+          "4,64%",
+          "video có hashtag"
+        ]
+      ],
+      "cards": [
+        [
+          "Theo tháng",
+          [
+            "Số bản ghi theo tháng tăng không đồng nghĩa mức quan tâm tăng; quy mô kênh và độ phủ crawl thay đổi theo thời gian.",
+            "Khoảng cuối 10/2026 là một phần kỳ quan sát; không so sánh như tháng đầy đủ."
+          ]
+        ],
+        [
+          "Từ và hashtag",
+          [
+            "Hashtag đứng đầu là #shorts (30.577 video), chủ yếu biểu thị định dạng.",
+            "Hashtag #tintuc có 5.119 video; hashtag không tự xác định một sự kiện."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "table-text",
+      "title": "Huấn luyện và lựa chọn mô hình",
+      "notes": "E03/E04 là hai lượt chạy mới ngày 02/11/2026. NPMI so sánh độ đồng xuất hiện từ khóa, không phải độ chính xác.",
+      "table": [
+        [
+          "Chỉ tiêu",
+          "E03: Word2Vec + KMeans",
+          "E04: LDA"
+        ],
+        [
+          "Số tài liệu theo registry",
+          "980.383",
+          "980.383"
+        ],
+        [
+          "Số cụm / chủ đề",
+          "10",
+          "10"
+        ],
+        [
+          "Kích thước từ vựng",
+          "9.227",
+          "9.202"
+        ],
+        [
+          "NPMI",
+          "**0,1828**",
+          "0,1281"
+        ],
+        [
+          "Silhouette (cosine)",
+          "0,1012",
+          "–"
+        ],
+        [
+          "Log-perplexity (heldout)",
+          "–",
+          "6,9676"
+        ]
+      ],
+      "items": [
+        "E03 được chọn làm mô hình chính theo NPMI cao hơn; chỉ số silhouette **0,1012** cho thấy cụm còn chồng lấn.",
+        "LDA bổ sung góc nhìn phân bố chủ đề; các nhãn đều là từ khóa tự động, chưa đánh giá thủ công.",
+        "Quality ghi 980.384 dòng đủ điều kiện; registry ghi 980.383 tài liệu cho mỗi lượt — lệch một dòng."
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "table-img",
+      "title": "Kết quả: 10 cụm chủ đề",
+      "notes": "Quy mô chủ đề của E03; nhãn lấy từ ba từ khóa nổi bật, cần đọc tiêu đề minh họa trước khi diễn giải như vấn đề cụ thể.",
+      "table": [
+        [
+          "Cụm từ khóa tự động",
+          "Video",
+          "Tỷ trọng",
+          "NPMI"
+        ],
+        [
+          "công · triển · nghiệp",
+          "183.764",
+          "17,17%",
+          "0,0581"
+        ],
+        [
+          "thơ · cần · tv",
+          "173.232",
+          "16,18%",
+          "0,0987"
+        ],
+        [
+          "xe · bắt · vụ",
+          "118.319",
+          "11,05%",
+          "0,1371"
+        ],
+        [
+          "lũ · dân · cháy",
+          "102.167",
+          "9,54%",
+          "0,0662"
+        ],
+        [
+          "giá · vàng · đồng",
+          "100.491",
+          "9,39%",
+          "0,1449"
+        ],
+        [
+          "ông · trump · mỹ",
+          "99.693",
+          "9,31%",
+          "0,2328"
+        ],
+        [
+          "nga · ukraine · iran",
+          "88.749",
+          "8,29%",
+          "0,2357"
+        ],
+        [
+          "hội · tỉnh · đại",
+          "80.399",
+          "7,51%",
+          "0,2838"
+        ],
+        [
+          "thời · ngày · sự",
+          "75.521",
+          "7,05%",
+          "0,2333"
+        ],
+        [
+          "mưa · tiết · bắc",
+          "48.145",
+          "4,50%",
+          "0,3374"
+        ]
+      ],
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\topics_updated_2026-11-03.png",
+          "alt": "Biểu đồ quy mô cụm chủ đề mới từ lượt chạy E03"
+        }
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "img-top",
+      "title": "Xu hướng theo thời gian và tăng đột biến",
+      "notes": "Biểu đồ theo tháng là tổng hợp từ daily topic_trend; số lượng video chịu ảnh hưởng bởi độ phủ kênh và crawl.",
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\trend_updated_2026-11-03.png",
+          "alt": "Xu hướng theo tháng của năm cụm chủ đề lớn nhất từ lượt chạy E03"
+        }
+      ],
+      "cards": [
+        [
+          "384 tín hiệu tăng đột biến",
+          [
+            "Các cụm có nhiều tín hiệu nhất: lũ · dân · cháy (51), thơ · cần · tv (45), mưa · tiết · bắc (40).",
+            "Ngưỡng: z > 2,5; ít nhất 20 video; tỷ trọng ít nhất 1,2 lần mức nền."
+          ]
+        ],
+        [
+          "Cách đọc",
+          [
+            "Đây là tín hiệu thống kê từ tỷ trọng cụm so với tối đa 7 ngày trước.",
+            "Cần mở video gốc để xác định có phải cùng một sự kiện hay không."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "compare",
+      "title": "Một cụm có thể ghép nhiều vấn đề khác nhau",
+      "notes": "Ví dụ lấy từ daily_issues ngày 28/01/2026; minh họa trực tiếp giới hạn ngữ nghĩa của các cụm.",
+      "cards": [
+        [
+          "28/01/2026 · nhãn “công · triển · nghiệp”",
+          [
+            "302 video từ 70 kênh được gán vào cụm trong ngày.",
+            "Ví dụ tiêu đề trong cùng cụm: sự cố máy bay tại Đắk Lắk, di dời dân cư Hà Nội, và virus Nipah."
+          ]
+        ],
+        [
+          "Giới hạn mô hình",
+          [
+            "Cụm từ khóa không đồng nghĩa một sự kiện thống nhất.",
+            "Silhouette E03 chỉ 0,1012; nhãn tự động cần được kiểm tra thủ công.",
+            "Không suy ra mức độ quan tâm của toàn xã hội từ số video."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "img-text",
+      "title": "Dashboard trực quan hóa: 6 trang",
+      "notes": "Infographic tổng hợp kết quả từ output mới, không phải ảnh chụp dashboard live.",
+      "images": [
+        {
+          "path": "docs\\slides\\assets-bigdata\\dashboard_updated_2026-11-03.png",
+          "alt": "Tóm tắt kết quả chủ đề trong mẫu cập nhật"
+        }
+      ],
+      "items": [
+        "**Bảng điểm**: chủ đề nhiều video nhất và tăng nhanh nhất theo ngày/tháng, kèm video minh họa.",
+        "**Các câu chuyện**: quy mô, từ khóa và hồ sơ từng cụm.",
+        "**Diễn biến**: tỷ trọng theo ngày, nhật ký tăng đột biến.",
+        "**Từ khóa & Hashtag**: TF-IDF theo ngày, hashtag theo thời gian.",
+        "**Phân tích văn bản**: câu “Bão số 5 gây mưa lớn…” → cụm mưa · lũ · bão (cosine 0,80).",
+        "**Dữ liệu & Phương pháp**: phễu chất lượng dữ liệu, nguồn và chỉ số."
+      ]
+    },
+    {
+      "kind": "section",
+      "number": 4,
+      "title": "Kết luận và định hướng phát triển"
+    },
+    {
+      "kind": "slide",
+      "layout": "compare",
+      "title": "Kết quả đạt được và hạn chế",
+      "notes": "Phân biệt pipeline phân tích đã hoàn thành với lượt thu thập nguồn chưa hoàn tất.",
+      "cards": [
+        [
+          "Kết quả đạt được",
+          [
+            "Pipeline phân tích chạy hoàn tất trên snapshot 1.070.550 video, 142 channel_id và 1.034 ngày lịch (ngày cuối chưa đủ).",
+            "So sánh E03 Word2Vec + KMeans với E04 LDA; E03 có NPMI 0,1828.",
+            "10 cụm chủ đề, 384 tín hiệu tăng đột biến; dashboard đọc kết quả MongoDB."
+          ]
+        ],
+        [
+          "Hạn chế",
+          [
+            "Lượt crawl chưa hoàn tất; 438.857 ID còn thiếu metadata.",
+            "70 video chưa được gán cụm; silhouette 0,1012, nhãn còn lẫn nhiều vấn đề.",
+            "Chất lượng metadata chưa đồng đều: 430.857 dòng thiếu view, 463.995 thiếu like.",
+            "Mẫu theo kênh báo/đài; không đại diện dư luận hoặc toàn bộ mạng xã hội."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "quad",
+      "title": "Định hướng phát triển",
+      "notes": "Ưu tiên cải thiện chất lượng nhận diện chủ đề trước khi mở rộng quy mô.",
+      "cards": [
+        [
+          "Chất lượng chủ đề",
+          [
+            "Tách từ tiếng Việt, bigram, loại tên kênh, thử nhiều giá trị k, đánh giá thủ công."
+          ]
+        ],
+        [
+          "Gom sự kiện",
+          [
+            "Gom video theo nội dung, thời gian, thực thể để đếm đúng một sự kiện."
+          ]
+        ],
+        [
+          "Thu thập định kỳ",
+          [
+            "Tự động quét lại kênh, lưu tương tác nhiều thời điểm, quản lý phiên bản."
+          ]
+        ],
+        [
+          "Mở rộng hệ thống",
+          [
+            "Chạy trên nhiều máy, đo khả năng mở rộng, thử Spark Structured Streaming."
+          ]
+        ]
+      ]
+    },
+    {
+      "kind": "slide",
+      "layout": "end",
+      "title": "",
+      "notes": "Cảm ơn và mời đặt câu hỏi.",
+      "items": [
+        "Sẵn sàng demo dashboard, Spark UI và HDFS.",
+        "Mời thầy cô và các bạn đặt câu hỏi."
+      ]
+    }
+  ]
+}
